@@ -87,6 +87,7 @@ float plotc_scale(float v, float vmin, float vmax, float margin) {
     return -1.0f + margin * 2 + (v - vmin) / (vmax - vmin) * (2.0f - margin * 4);
 }
 
+/*
 static void plotc_draw_grid() {
     glColor3f(0.8f, 0.8f, 0.8f);
     glLineWidth(1.0f);
@@ -101,16 +102,75 @@ static void plotc_draw_grid() {
     }
     glEnd();
 }
+*/
 
-static void plotc_draw_data(float* x, float* y, int n) {
-    glColor3f(0.0f, 0.0f, 1.0f);
-    glLineWidth(2.0f);
-    glBegin(GL_LINE_STRIP);
-    for (int i = 0; i < n; i++) {
-        glVertex2f(x[i], y[i]);
+typedef struct {
+	float xmin, xmax, ymin, ymax;
+} bounds;
+
+bounds plotc_draw_grid_scale_calc(float* x, float* y, int n) {
+	
+	bounds b = { 
+		x[0], 
+		x[0],
+		y[0], 
+		y[0]
+	};
+	
+    for (int i = 1; i < n; i++) {
+        if (x[i] < b.xmin) b.xmin = x[i];
+        if (x[i] > b.xmax) b.xmax = x[i];
+        if (y[i] < b.ymin) b.ymin = y[i];
+        if (y[i] > b.ymax) b.ymax = y[i];
     }
+	
+	return b; 
+}
+
+static void plotc_draw_grid(float xmin, float xmax, float ymin, float ymax, float margin) {
+	glColor3f(0.8f, 0.8f, 0.8f);
+	glLineWidth(1.0f);
+
+	glBegin(GL_LINES);
+
+	// X irányban 11 osztás (10 köz)
+	for (int i = 0; i <= 10; i++) {
+		float x = xmin + i * (xmax - xmin) / 10.0f;
+		float xp = plotc_scale(x, xmin, xmax, margin);
+		
+		glVertex2f(xp, plotc_scale(ymin, ymin, ymax, margin));
+		glVertex2f(xp, plotc_scale(ymax, ymin, ymax, margin));
+	}
+
+	// Y irányban 11 osztás
+	for (int i = 0; i <= 10; i++) {
+		float y = ymin + i * (ymax - ymin) / 10.0f;
+		float yp = plotc_scale(y, ymin, ymax, margin);
+
+		glVertex2f(plotc_scale(xmin, xmin, xmax, margin), yp);
+		glVertex2f(plotc_scale(xmax, xmin, xmax, margin), yp);
+	}
+
+	glEnd();
+}
+
+static void plotc_draw_data(float* x, float* y, int n, bounds b) {
+	
+	// color, line
+		glColor3f(0.0f, 0.0f, 1.0f);
+		glLineWidth(2.0f);
+	
+
+	// fill data
+		glBegin(GL_LINE_STRIP);
+		for (int i = 0; i < n; i++) {
+			glVertex2f(x[i], y[i]);
+		}
+		
     glEnd();
 }
+
+
 
 void plotc(float* x, float* y, int n, const char* title) {
 	
@@ -118,28 +178,43 @@ void plotc(float* x, float* y, int n, const char* title) {
     load_glfw_dll_once();  // ez tölti be a DLL-t és a pointereket
 	#endif
 
-    if (!glfwInit_ptr()) return;
+	// check
+		if (!glfwInit_ptr()) return;
 
-    GLFWwindow* window = glfwCreateWindow_ptr(800, 600, title, NULL, NULL);
-    if (!window) {
-        glfwTerminate_ptr();
-        return;
-    }
+		GLFWwindow* window = glfwCreateWindow_ptr(800, 600, title, NULL, NULL);
+		if (!window) {
+			glfwTerminate_ptr();
+			return;
+		}
 
-    glfwMakeContextCurrent_ptr(window);
+		glfwMakeContextCurrent_ptr(window);
 
-    while (!glfwWindowShouldClose_ptr(window)) {
-        glClearColor(1, 1, 1, 1);
-        glClear(GL_COLOR_BUFFER_BIT);
+	// calc bounds of grid
+	
+		bounds b = plotc_draw_grid_scale_calc(x, y, n);
+		
+	// window
+		while (!glfwWindowShouldClose_ptr(window)) {
+			
+			// default color
+			glClearColor(1, 1, 1, 1);
+			glClear(GL_COLOR_BUFFER_BIT);
 
-		plotc_draw_grid();            
-        plotc_draw_data(x, y, n); 
+			// the display section
+			float margin = 0.1f;
+			
+			plotc_draw_grid(b.xmin, b.xmax, b.ymin, b.ymax, margin);
+			//plotc_draw_grid();  
 
-        glfwSwapBuffers_ptr(window);
-        glfwPollEvents_ptr();
-    }
+			// data
+			plotc_draw_data(x, y, n, b); 
 
-    glfwDestroyWindow_ptr(window);  // ez továbbra is linkerrel kell (vagy: GetProcAddress hozzá is)
+			// swap buffer
+			glfwSwapBuffers_ptr(window);
+			glfwPollEvents_ptr();
+		}
+
+    glfwDestroyWindow_ptr(window); 
     glfwTerminate_ptr();
 }
 
