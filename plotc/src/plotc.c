@@ -34,7 +34,12 @@ static PFN_glfwSwapBuffers glfwSwapBuffers_ptr;
 static PFN_glfwPollEvents glfwPollEvents_ptr;
 static PFN_glfwDestroyWindow glfwDestroyWindow_ptr;
 
-static HMODULE glfw = NULL; // 💡 globális, hogy a makró is lássa
+static HMODULE glfw = NULL; // globális, hogy a makró is lássa
+
+// global 
+
+static int rendering_now = 1;
+
 
 static void load_glfw_dll_once() {
     static int once = 0;
@@ -194,25 +199,32 @@ void plotc(float* x, float* y, int n, const char* title) {
 		bounds b = plotc_draw_grid_scale_calc(x, y, n);
 		
 	// window
-		while (!glfwWindowShouldClose_ptr(window)) {
+		while (!glfwWindowShouldClose_ptr(window)) {	
 			
-			// default color
-			glClearColor(1, 1, 1, 1);
-			glClear(GL_COLOR_BUFFER_BIT);
+			// rendering
+			if (rendering_now) {
+				
+				// default color
+				glClearColor(1, 1, 1, 1);
+				glClear(GL_COLOR_BUFFER_BIT);
 
-			// the display section
-			float margin = 0.1f;
+				// the display section
+				float margin = 0.1f;
+				
+				plotc_draw_grid(b.xmin, b.xmax, b.ymin, b.ymax, margin);
+				//plotc_draw_grid();  
+
+				// data
+				plotc_draw_data(x, y, n, b); 
+				rendering_now ^= 0;	
+								
+				// swap buffer
+				glfwSwapBuffers_ptr(window);
+				glfwPollEvents_ptr();		
 			
-			plotc_draw_grid(b.xmin, b.xmax, b.ymin, b.ymax, margin);
-			//plotc_draw_grid();  
+			}
 
-			// data
-			plotc_draw_data(x, y, n, b); 
-
-			// swap buffer
-			glfwSwapBuffers_ptr(window);
-			glfwPollEvents_ptr();
-		}
+		} // end of loop(window)
 
     glfwDestroyWindow_ptr(window); 
     glfwTerminate_ptr();
