@@ -23,6 +23,7 @@ typedef int (*PFN_glfwWindowShouldClose)(GLFWwindow*);
 typedef void (*PFN_glfwSwapBuffers)(GLFWwindow*);
 typedef void (*PFN_glfwPollEvents)(void);
 typedef void (*PFN_glfwDestroyWindow)(GLFWwindow*);
+typedef void (*PFN_glfwSetFramebufferSizeCallback)(GLFWwindow *window, GLFWframebuffersizefun cbfun);
 
 // ----- Globális mutatók -----
 static PFN_glfwInit glfwInit_ptr;
@@ -33,6 +34,7 @@ static PFN_glfwWindowShouldClose glfwWindowShouldClose_ptr;
 static PFN_glfwSwapBuffers glfwSwapBuffers_ptr;
 static PFN_glfwPollEvents glfwPollEvents_ptr;
 static PFN_glfwDestroyWindow glfwDestroyWindow_ptr;
+static PFN_glfwSetFramebufferSizeCallback glfwSetFramebufferSizeCallback_ptr;
 
 static HMODULE glfw = NULL; // globális, hogy a makró is lássa
 
@@ -85,6 +87,11 @@ static void load_glfw_dll_once() {
 #define load_glfw_dll_once()
 #endif
 
+// events
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+	printf ("window size event...");
+}
 
 // methods
 
@@ -159,16 +166,19 @@ static void plotc_draw_grid(float xmin, float xmax, float ymin, float ymax, floa
 	glEnd();
 }
 
-static void plotc_draw_data(float* x, float* y, int n, bounds b) {
+static void plotc_draw_data(float* x, float* y, int n, float margin) {
 	
 	// color, line
 		glColor3f(0.0f, 0.0f, 1.0f);
 		glLineWidth(2.0f);
+		
+	// margin
+		float set_margin = 1.0f - (2 * margin);
 	
 	// fill data
 		glBegin(GL_LINE_STRIP);
 		for (int i = 0; i < n; i++) {
-			glVertex2f(x[i], y[i]);
+			glVertex2f(x[i] * set_margin, y[i] * set_margin);
 		}
 		
     glEnd();
@@ -192,11 +202,15 @@ void plotc(float* x, float* y, int n, const char* title) {
 		}
 
 		glfwMakeContextCurrent_ptr(window);
+	
+	// events
+	
+		// glfwSetFramebufferSizeCallback_ptr(window, framebuffer_size_callback);
 
 	// calc bounds of grid
 	
 		bounds b = plotc_draw_grid_scale_calc(x, y, n);
-		
+				
 	// window
 		while (!glfwWindowShouldClose_ptr(window)) {	
 			
@@ -214,7 +228,7 @@ void plotc(float* x, float* y, int n, const char* title) {
 				//plotc_draw_grid();  
 
 				// data
-				plotc_draw_data(x, y, n, b); 
+				plotc_draw_data(x, y, n, margin); 
 				rendering_now = 0;	
 				
 				// swap buffer

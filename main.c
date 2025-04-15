@@ -1,4 +1,5 @@
 #include "plotc.h"
+#include <math.h>
 
 int main() {
 	
