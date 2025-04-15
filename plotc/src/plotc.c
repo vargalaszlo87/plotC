@@ -165,7 +165,6 @@ static void plotc_draw_data(float* x, float* y, int n, bounds b) {
 		glColor3f(0.0f, 0.0f, 1.0f);
 		glLineWidth(2.0f);
 	
-
 	// fill data
 		glBegin(GL_LINE_STRIP);
 		for (int i = 0; i < n; i++) {
@@ -203,7 +202,7 @@ void plotc(float* x, float* y, int n, const char* title) {
 			
 			// rendering
 			if (rendering_now) {
-				
+								
 				// default color
 				glClearColor(1, 1, 1, 1);
 				glClear(GL_COLOR_BUFFER_BIT);
@@ -216,13 +215,15 @@ void plotc(float* x, float* y, int n, const char* title) {
 
 				// data
 				plotc_draw_data(x, y, n, b); 
-				rendering_now ^= 0;	
-								
+				rendering_now = 0;	
+				
 				// swap buffer
 				glfwSwapBuffers_ptr(window);
-				glfwPollEvents_ptr();		
-			
+													
 			}
+			
+			// poll
+			glfwPollEvents_ptr();	
 
 		} // end of loop(window)
 
