@@ -8,6 +8,10 @@
 // glfw3 inculde
 #include <glfw3.h>  
 
+// DEBUG mode
+
+#define DEBUG
+
 // load dll dinamically
 #ifdef _WIN32
 
@@ -18,12 +22,14 @@
 typedef int (*PFN_glfwInit)(void);
 typedef void (*PFN_glfwTerminate)(void);
 typedef GLFWwindow* (*PFN_glfwCreateWindow)(int, int, const char*, void*, void*);
+typedef void (*GLFWframebuffersizefun)(GLFWwindow*, int, int);
 typedef void (*PFN_glfwMakeContextCurrent)(GLFWwindow*);
 typedef int (*PFN_glfwWindowShouldClose)(GLFWwindow*);
 typedef void (*PFN_glfwSwapBuffers)(GLFWwindow*);
 typedef void (*PFN_glfwPollEvents)(void);
 typedef void (*PFN_glfwDestroyWindow)(GLFWwindow*);
-typedef void (*PFN_glfwSetFramebufferSizeCallback)(GLFWwindow *window, GLFWframebuffersizefun cbfun);
+typedef void (*PFN_glfwSetFramebufferSizeCallback)(GLFWwindow*, GLFWframebuffersizefun);
+typedef void (*PFN_glfwGetFramebufferSize)(GLFWwindow*, int*, int*);
 
 // ----- Globális mutatók -----
 static PFN_glfwInit glfwInit_ptr;
@@ -35,6 +41,7 @@ static PFN_glfwSwapBuffers glfwSwapBuffers_ptr;
 static PFN_glfwPollEvents glfwPollEvents_ptr;
 static PFN_glfwDestroyWindow glfwDestroyWindow_ptr;
 static PFN_glfwSetFramebufferSizeCallback glfwSetFramebufferSizeCallback_ptr;
+static PFN_glfwGetFramebufferSize glfwGetFramebufferSize_ptr;
 
 static HMODULE glfw = NULL; // globális, hogy a makró is lássa
 
@@ -47,9 +54,11 @@ static void load_glfw_dll_once() {
     static int once = 0;
 	static int loaded = 0;
 
+	// check state of loaded
 	if (loaded)
 		return;
 
+	// check state of once
     if (!once) {
         SetDllDirectoryA("plotc/lib/windows");
         glfw = LoadLibraryA("glfw3.dll");
@@ -80,6 +89,8 @@ static void load_glfw_dll_once() {
     LOAD_PROC(glfwSwapBuffers);
     LOAD_PROC(glfwPollEvents);
 	LOAD_PROC(glfwDestroyWindow);
+	LOAD_PROC(glfwSetFramebufferSizeCallback);
+	LOAD_PROC(glfwGetFramebufferSize);
 
     loaded = 1;
 }
@@ -90,7 +101,25 @@ static void load_glfw_dll_once() {
 // events
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-	printf ("window size event...");
+    // Megakadályozzuk a 0 felbontást
+    if (height == 0) height = 1;
+
+    glViewport(0, 0, width, height);
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    // Ortografikus vetítés (bal, jobb, lent, fent, near, far)
+    glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+	
+	// re-rendering
+	rendering_now = 1;
+	
+	#ifdef DEBUG
+		printf ("> framebuffer is resized.\n");
+	#endif
 }
 
 // methods
@@ -115,6 +144,12 @@ static void plotc_draw_grid() {
     glEnd();
 }
 */
+
+/* 
+ *
+ * GRID
+ *
+ */
 
 typedef struct {
 	float xmin, xmax, ymin, ymax;
@@ -166,24 +201,102 @@ static void plotc_draw_grid(float xmin, float xmax, float ymin, float ymax, floa
 	glEnd();
 }
 
-static void plotc_draw_data(float* x, float* y, int n, float margin) {
+/*
+ * 
+ * DATA
+ *
+ */
+static void plotc_draw_data(float* x, float* y, int n, bounds b, float margin) {
 	
 	// color, line
 		glColor3f(0.0f, 0.0f, 1.0f);
 		glLineWidth(2.0f);
-		
-	// margin
-		float set_margin = 1.0f - (2 * margin);
 	
 	// fill data
 		glBegin(GL_LINE_STRIP);
 		for (int i = 0; i < n; i++) {
-			glVertex2f(x[i] * set_margin, y[i] * set_margin);
+			float xp = plotc_scale(x[i], b.xmin, b.xmax, margin);
+			float yp = plotc_scale(y[i], b.ymin, b.ymax, margin);
+			glVertex2f(xp, yp);
 		}
 		
     glEnd();
 }
 
+/*
+ *
+ * DRAW elements
+ *
+ */
+ 
+ static void plotc_draw_char(char c, float x, float y, float size) {
+    // Csak pár betűre példa (S, T, A, U, :), lehet bővíteni
+    glBegin(GL_LINES);
+    switch (c) {
+        case 'S':
+            glVertex2f(x + 0.0f * size, y + 0.0f * size); glVertex2f(x + 1.0f * size, y + 0.0f * size);
+            glVertex2f(x + 0.0f * size, y + 0.0f * size); glVertex2f(x + 0.0f * size, y + 0.5f * size);
+            glVertex2f(x + 0.0f * size, y + 0.5f * size); glVertex2f(x + 1.0f * size, y + 0.5f * size);
+            glVertex2f(x + 1.0f * size, y + 0.5f * size); glVertex2f(x + 1.0f * size, y + 1.0f * size);
+            glVertex2f(x + 0.0f * size, y + 1.0f * size); glVertex2f(x + 1.0f * size, y + 1.0f * size);
+            break;
+		case 'A':
+            glVertex2f(x + 0.0f * size, y + 0.0f * size); glVertex2f(x + 0.5f * size, y + 1.0f * size);
+            glVertex2f(x + 0.5f * size, y + 1.0f * size); glVertex2f(x + 1.0f * size, y + 0.0f * size);
+            glVertex2f(x + 0.25f * size, y + 0.5f * size); glVertex2f(x + 0.75f * size, y + 0.5f * size);
+            break;	
+        case 'T':
+            glVertex2f(x + 0.5f * size, y + 0.0f * size); glVertex2f(x + 0.5f * size, y + 1.0f * size);
+            glVertex2f(x + 0.0f * size, y + 1.0f * size); glVertex2f(x + 1.0f * size, y + 1.0f * size);
+            break;
+        case ':':
+            glVertex2f(x + 0.5f * size, y + 0.3f * size); glVertex2f(x + 0.5f * size, y + 0.3f * size);
+            glVertex2f(x + 0.5f * size, y + 0.7f * size); glVertex2f(x + 0.5f * size, y + 0.7f * size);
+            break;
+        case 'O':
+            glVertex2f(x + 0.0f * size, y + 0.0f * size); glVertex2f(x + 1.0f * size, y + 0.0f * size);
+            glVertex2f(x + 1.0f * size, y + 0.0f * size); glVertex2f(x + 1.0f * size, y + 1.0f * size);
+            glVertex2f(x + 1.0f * size, y + 1.0f * size); glVertex2f(x + 0.0f * size, y + 1.0f * size);
+            glVertex2f(x + 0.0f * size, y + 1.0f * size); glVertex2f(x + 0.0f * size, y + 0.0f * size);
+            break;
+        case 'K':
+            glVertex2f(x + 0.0f * size, y + 0.0f * size); glVertex2f(x + 0.0f * size, y + 1.0f * size);
+            glVertex2f(x + 1.0f * size, y + 0.0f * size); glVertex2f(x + 0.0f * size, y + 0.5f * size);
+            glVertex2f(x + 1.0f * size, y + 1.0f * size); glVertex2f(x + 0.0f * size, y + 0.5f * size);
+            break;
+        case ' ':
+            break; // üres karakter
+    }
+    glEnd();
+}
+
+static void plotc_draw_text_fixed(const char* text, float x, float y, float size) {
+    glColor3f(0.1f, 0.1f, 0.1f); // sötétszürke szöveg
+    float spacing = size * 1.2f;
+
+    for (const char* p = text; *p; p++) {
+        plotc_draw_char(*p, x, y, size);
+        x += spacing;
+    }
+}
+
+static void plotc_draw_statusbar(float margin) {
+    float bar_height = 0.1f; // OpenGL koordináta-térben
+    float y0 = -1.0f;
+    float y1 = y0 + bar_height;
+
+    // háttérsáv
+    glColor3f(0.9f, 0.9f, 0.9f);
+    glBegin(GL_QUADS);
+        glVertex2f(-1.0f, y0);
+        glVertex2f( 1.0f, y0);
+        glVertex2f( 1.0f, y1);
+        glVertex2f(-1.0f, y1);
+    glEnd();
+
+    // tesztszöveg kirajzolása
+    plotc_draw_text_fixed("STATUS: OK", -1.0f + margin, y0 + 0.03f, 0.025f);
+}
 
 
 void plotc(float* x, float* y, int n, const char* title) {
@@ -205,7 +318,20 @@ void plotc(float* x, float* y, int n, const char* title) {
 	
 	// events
 	
-		// glfwSetFramebufferSizeCallback_ptr(window, framebuffer_size_callback);
+		if (!glfwSetFramebufferSizeCallback_ptr) {
+			printf("! glfwSetFramebufferSizeCallback method is not loaded!\n");
+		}
+		else {
+			glfwSetFramebufferSizeCallback_ptr(window, framebuffer_size_callback);
+			#ifdef DEBUG
+				printf("> address of glfwSetFramebufferSizeCallback : %p\n", glfwSetFramebufferSizeCallback_ptr);
+			#endif
+		}
+			
+	// Alap viewport
+		int width, height;
+		glfwGetFramebufferSize_ptr(window, &width, &height);
+		framebuffer_size_callback(window, width, height);
 
 	// calc bounds of grid
 	
@@ -222,13 +348,24 @@ void plotc(float* x, float* y, int n, const char* title) {
 				glClear(GL_COLOR_BUFFER_BIT);
 
 				// the display section
-				float margin = 0.1f;
+				
+				//float margin = 0.1f;
+				
+				int margin_px = 25;
+				float margin_x = (float)margin_px / (float)width;
+				float margin_y = (float)margin_px / (float)height;
+				float margin = margin_x < margin_y ? margin_x : margin_y;
 				
 				plotc_draw_grid(b.xmin, b.xmax, b.ymin, b.ymax, margin);
 				//plotc_draw_grid();  
 
 				// data
-				plotc_draw_data(x, y, n, margin); 
+				plotc_draw_data(x, y, n, b, margin); 
+				
+				// status bar
+				plotc_draw_statusbar(margin);
+								
+				// rendering
 				rendering_now = 0;	
 				
 				// swap buffer
