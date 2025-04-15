@@ -6,7 +6,10 @@
 #include "plotc.h"
 
 // glfw3 inculde
-#include <glfw3.h>  
+#include "glfw3.h"  
+
+// stb_easy_font
+#include "stb_easy_font.h"
 
 // DEBUG mode
 
@@ -229,61 +232,38 @@ static void plotc_draw_data(float* x, float* y, int n, bounds b, float margin) {
  *
  */
  
- static void plotc_draw_char(char c, float x, float y, float size) {
-    // Csak pár betűre példa (S, T, A, U, :), lehet bővíteni
-    glBegin(GL_LINES);
-    switch (c) {
-        case 'S':
-            glVertex2f(x + 0.0f * size, y + 0.0f * size); glVertex2f(x + 1.0f * size, y + 0.0f * size);
-            glVertex2f(x + 0.0f * size, y + 0.0f * size); glVertex2f(x + 0.0f * size, y + 0.5f * size);
-            glVertex2f(x + 0.0f * size, y + 0.5f * size); glVertex2f(x + 1.0f * size, y + 0.5f * size);
-            glVertex2f(x + 1.0f * size, y + 0.5f * size); glVertex2f(x + 1.0f * size, y + 1.0f * size);
-            glVertex2f(x + 0.0f * size, y + 1.0f * size); glVertex2f(x + 1.0f * size, y + 1.0f * size);
-            break;
-		case 'A':
-            glVertex2f(x + 0.0f * size, y + 0.0f * size); glVertex2f(x + 0.5f * size, y + 1.0f * size);
-            glVertex2f(x + 0.5f * size, y + 1.0f * size); glVertex2f(x + 1.0f * size, y + 0.0f * size);
-            glVertex2f(x + 0.25f * size, y + 0.5f * size); glVertex2f(x + 0.75f * size, y + 0.5f * size);
-            break;	
-        case 'T':
-            glVertex2f(x + 0.5f * size, y + 0.0f * size); glVertex2f(x + 0.5f * size, y + 1.0f * size);
-            glVertex2f(x + 0.0f * size, y + 1.0f * size); glVertex2f(x + 1.0f * size, y + 1.0f * size);
-            break;
-        case ':':
-            glVertex2f(x + 0.5f * size, y + 0.3f * size); glVertex2f(x + 0.5f * size, y + 0.3f * size);
-            glVertex2f(x + 0.5f * size, y + 0.7f * size); glVertex2f(x + 0.5f * size, y + 0.7f * size);
-            break;
-        case 'O':
-            glVertex2f(x + 0.0f * size, y + 0.0f * size); glVertex2f(x + 1.0f * size, y + 0.0f * size);
-            glVertex2f(x + 1.0f * size, y + 0.0f * size); glVertex2f(x + 1.0f * size, y + 1.0f * size);
-            glVertex2f(x + 1.0f * size, y + 1.0f * size); glVertex2f(x + 0.0f * size, y + 1.0f * size);
-            glVertex2f(x + 0.0f * size, y + 1.0f * size); glVertex2f(x + 0.0f * size, y + 0.0f * size);
-            break;
-        case 'K':
-            glVertex2f(x + 0.0f * size, y + 0.0f * size); glVertex2f(x + 0.0f * size, y + 1.0f * size);
-            glVertex2f(x + 1.0f * size, y + 0.0f * size); glVertex2f(x + 0.0f * size, y + 0.5f * size);
-            glVertex2f(x + 1.0f * size, y + 1.0f * size); glVertex2f(x + 0.0f * size, y + 0.5f * size);
-            break;
-        case ' ':
-            break; // üres karakter
-    }
-    glEnd();
-}
+ 
+static void plotc_draw_text_bitmap(const char* text, float x, float y, float scale) {
+    char buffer[99999]; // elég nagy buffer
+    int num_quads;
 
-static void plotc_draw_text_fixed(const char* text, float x, float y, float size) {
-    glColor3f(0.1f, 0.1f, 0.1f); // sötétszürke szöveg
-    float spacing = size * 1.2f;
+    num_quads = stb_easy_font_print(
+        x * 100.0f,               // pixelalapú pozícióra konvertálás
+        y * 100.0f,
+        (char*)text,
+        NULL,
+        buffer, sizeof(buffer)
+    );
 
-    for (const char* p = text; *p; p++) {
-        plotc_draw_char(*p, x, y, size);
-        x += spacing;
-    }
+    glPushMatrix();
+    glScalef(scale / 100.0f, scale / 100.0f, 1.0f); // pixelkoordináta → OpenGL világba
+
+    glColor3f(0.1f, 0.1f, 0.1f); // sötétszürke
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(2, GL_FLOAT, 16, buffer);
+    glDrawArrays(GL_QUADS, 0, num_quads * 4);
+    glDisableClientState(GL_VERTEX_ARRAY);
+
+    glPopMatrix();
 }
+ 
 
 static void plotc_draw_statusbar(float margin) {
     float bar_height = 0.1f; // OpenGL koordináta-térben
     float y0 = -1.0f;
-    float y1 = y0 + bar_height;
+    float y1 = y0 + margin * 1.5;
+
+	//printf ("%lf", margin);
 
     // háttérsáv
     glColor3f(0.9f, 0.9f, 0.9f);
@@ -293,11 +273,8 @@ static void plotc_draw_statusbar(float margin) {
         glVertex2f( 1.0f, y1);
         glVertex2f(-1.0f, y1);
     glEnd();
-
-    // tesztszöveg kirajzolása
-    plotc_draw_text_fixed("STATUS: OK", -1.0f + margin, y0 + 0.03f, 0.025f);
+	
 }
-
 
 void plotc(float* x, float* y, int n, const char* title) {
 	
@@ -347,17 +324,16 @@ void plotc(float* x, float* y, int n, const char* title) {
 				glClearColor(1, 1, 1, 1);
 				glClear(GL_COLOR_BUFFER_BIT);
 
-				// the display section
-				
+				// margin			
 				//float margin = 0.1f;
 				
-				int margin_px = 25;
+				int margin_px = 50;
 				float margin_x = (float)margin_px / (float)width;
 				float margin_y = (float)margin_px / (float)height;
 				float margin = margin_x < margin_y ? margin_x : margin_y;
 				
-				plotc_draw_grid(b.xmin, b.xmax, b.ymin, b.ymax, margin);
-				//plotc_draw_grid();  
+				// grid
+				plotc_draw_grid(b.xmin, b.xmax, b.ymin, b.ymax, margin);  
 
 				// data
 				plotc_draw_data(x, y, n, b, margin); 
