@@ -51,7 +51,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-	
+		
 	// re-rendering
 	renderingNow = 1;
 	

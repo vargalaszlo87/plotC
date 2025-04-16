@@ -78,6 +78,10 @@ unsigned char bitmap[512*512];
 GLuint font_texture;
 stbtt_bakedchar cdata[96]; // ASCII 32..126
 
+//int width, height;
+static int width;
+static int height;
+
 
 // methods
 
@@ -90,6 +94,8 @@ float plotc_scale(float v, float vmin, float vmax, float margin) {
  */
  
  void init_font_texture(const char* font_path) {
+	 
+	 // open the font
     FILE* f = fopen(font_path, "rb");
 	if (!f) {
 		#ifdef DEBUG
@@ -104,11 +110,12 @@ float plotc_scale(float v, float vmin, float vmax, float margin) {
 			printf ("! The font type reading is failed. \n");
 		#endif
 	}
-	
-	
-    fclose(f);
 
-    stbtt_BakeFontBitmap(ttf_buffer, 0, 32.0, bitmap, 512, 512, 32, 96, cdata); // 32px font
+    fclose(f);
+	
+	// 
+
+    stbtt_BakeFontBitmap(ttf_buffer, 0, 18.0, bitmap, 512, 512, 32, 96, cdata); // 32px font
 
     glGenTextures(1, &font_texture);
     glBindTexture(GL_TEXTURE_2D, font_texture);
@@ -141,6 +148,7 @@ void draw_text(float x, float y, const char* text) {
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_BLEND);
 }
+
 
 /*!
  * GRID
@@ -200,6 +208,7 @@ static void plotc_draw_grid(float xmin, float xmax, float ymin, float ymax, floa
 /*!
  * DATA
  */
+ 
 static void plotc_draw_data(float* x, float* y, int n, bounds b, float margin) {
 	
 	// color, line
@@ -266,7 +275,8 @@ void plotc(float* x, float* y, int n, const char* title) {
 		}
 			
 	// Alap viewport
-		int width, height;
+		
+		//int width, height;
 		glfwGetFramebufferSize_ptr(window, &width, &height);
 		framebuffer_size_callback(window, width, height);
 
@@ -310,10 +320,10 @@ void plotc(float* x, float* y, int n, const char* title) {
 				glOrtho(0, width, height, 0, -1, 1);
 
 				glColor3f(1, 0, 0); // piros szöveg
-				draw_text(1, 40, "Test!");
+				draw_text(1, 400, "Test!");
 
-				//glMatrixMode(GL_MODELVIEW);
-				//glLoadIdentity();				
+				glMatrixMode(GL_MODELVIEW);
+				glLoadIdentity();
 					
 				// rendering
 				renderingNow = 0;	
