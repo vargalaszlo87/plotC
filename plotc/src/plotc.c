@@ -1,129 +1,83 @@
-// standard C
+/*!
+ * @project plotC  v.0.1	
+ * @file pltoc.c
+ * @brief This is a simple plotting tool for C projects with OpenGL
+ *
+ * Version information:
+ *
+ *
+ * Features:
+ * - plotting from one datastream (x, y)
+ * - grid
+ * - resizable window
+ * - status bar (mouse position)
+ *
+ * @author Varga Laszlo
+ *
+ * @website https://github.com/vargalaszlo87/plotC
+ * @website http://vargalaszlo.com
+ * @website http://ha1cx.hu
+ *
+ * @date 2025-04-16
+ *
+ * @license
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+/*!
+ * standard includes
+ */
+ 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stddef.h>
 
-// plotC projekt
-#include "plotc.h"
+/*!
+ * extern includes
+ */
+ 
+#define GL_IMPLEMENTATION
+#include <GL/gl.h>
 
-// glfw3 inculde
+#define GLFW3_IMPLEMENTATION
 #include "glfw3.h"  
 
-// stb_easy_font
-#include "stb_easy_font.h"
+#define STB_TRUETYPE_IMPLEMENTATION
+#include "stb_truetype.h"
 
-// DEBUG mode
+/*!
+ * project includes
+ */
+ 
+#include "debug.h"
+#include "plotc.h"
+#include "dyndll.h"
+#include "events.h"
 
-#define DEBUG
+/*!
+ * global variables
+ */
 
-// load dll dinamically
-#ifdef _WIN32
+int renderingNow = 1;
 
-#include <windows.h>
-#include <stdio.h>
+unsigned char ttf_buffer[1<<20];
+unsigned char bitmap[512*512];
 
-// ----- GLFW typedef-ek -----
-typedef int (*PFN_glfwInit)(void);
-typedef void (*PFN_glfwTerminate)(void);
-typedef GLFWwindow* (*PFN_glfwCreateWindow)(int, int, const char*, void*, void*);
-typedef void (*GLFWframebuffersizefun)(GLFWwindow*, int, int);
-typedef void (*PFN_glfwMakeContextCurrent)(GLFWwindow*);
-typedef int (*PFN_glfwWindowShouldClose)(GLFWwindow*);
-typedef void (*PFN_glfwSwapBuffers)(GLFWwindow*);
-typedef void (*PFN_glfwPollEvents)(void);
-typedef void (*PFN_glfwDestroyWindow)(GLFWwindow*);
-typedef void (*PFN_glfwSetFramebufferSizeCallback)(GLFWwindow*, GLFWframebuffersizefun);
-typedef void (*PFN_glfwGetFramebufferSize)(GLFWwindow*, int*, int*);
+GLuint font_texture;
+stbtt_bakedchar cdata[96]; // ASCII 32..126
 
-// ----- Globális mutatók -----
-static PFN_glfwInit glfwInit_ptr;
-static PFN_glfwTerminate glfwTerminate_ptr;
-static PFN_glfwCreateWindow glfwCreateWindow_ptr;
-static PFN_glfwMakeContextCurrent glfwMakeContextCurrent_ptr;
-static PFN_glfwWindowShouldClose glfwWindowShouldClose_ptr;
-static PFN_glfwSwapBuffers glfwSwapBuffers_ptr;
-static PFN_glfwPollEvents glfwPollEvents_ptr;
-static PFN_glfwDestroyWindow glfwDestroyWindow_ptr;
-static PFN_glfwSetFramebufferSizeCallback glfwSetFramebufferSizeCallback_ptr;
-static PFN_glfwGetFramebufferSize glfwGetFramebufferSize_ptr;
-
-static HMODULE glfw = NULL; // globális, hogy a makró is lássa
-
-// global 
-
-static int rendering_now = 1;
-
-
-static void load_glfw_dll_once() {
-    static int once = 0;
-	static int loaded = 0;
-
-	// check state of loaded
-	if (loaded)
-		return;
-
-	// check state of once
-    if (!once) {
-        SetDllDirectoryA("plotc/lib/windows");
-        glfw = LoadLibraryA("glfw3.dll");
-
-        if (!glfw) {
-            DWORD err = GetLastError();
-            printf("! glfw3.dll loading is failed! Errorcode: %lu\n", err);
-            exit(1);
-        } else {
-            printf("> glfw3.dll has been loaded!\n");
-        }
-
-        once = 1;
-    }
-
-	#define LOAD_PROC(name) \
-        name##_ptr = (PFN_##name)GetProcAddress(glfw, #name); \
-        if (!name##_ptr) { \
-            printf("! Loading is failed: %s\n", #name); \
-            exit(1); \
-        }
-
-    LOAD_PROC(glfwInit);
-    LOAD_PROC(glfwTerminate);
-    LOAD_PROC(glfwCreateWindow);
-    LOAD_PROC(glfwMakeContextCurrent);
-    LOAD_PROC(glfwWindowShouldClose);
-    LOAD_PROC(glfwSwapBuffers);
-    LOAD_PROC(glfwPollEvents);
-	LOAD_PROC(glfwDestroyWindow);
-	LOAD_PROC(glfwSetFramebufferSizeCallback);
-	LOAD_PROC(glfwGetFramebufferSize);
-
-    loaded = 1;
-}
-#else
-#define load_glfw_dll_once()
-#endif
-
-// events
-
-void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-    // Megakadályozzuk a 0 felbontást
-    if (height == 0) height = 1;
-
-    glViewport(0, 0, width, height);
-
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    // Ortografikus vetítés (bal, jobb, lent, fent, near, far)
-    glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-	
-	// re-rendering
-	rendering_now = 1;
-	
-	#ifdef DEBUG
-		printf ("> framebuffer is resized.\n");
-	#endif
-}
 
 // methods
 
@@ -131,27 +85,65 @@ float plotc_scale(float v, float vmin, float vmax, float margin) {
     return -1.0f + margin * 2 + (v - vmin) / (vmax - vmin) * (2.0f - margin * 4);
 }
 
-/*
-static void plotc_draw_grid() {
-    glColor3f(0.8f, 0.8f, 0.8f);
-    glLineWidth(1.0f);
-    glBegin(GL_LINES);
-    for (float x = -1.0f; x <= 1.0f; x += 0.2f) {
-        glVertex2f(x, -1.0f);
-        glVertex2f(x,  1.0f);
-    }
-    for (float y = -1.0f; y <= 1.0f; y += 0.2f) {
-        glVertex2f(-1.0f, y);
-        glVertex2f( 1.0f, y);
-    }
-    glEnd();
-}
-*/
+/*!
+ * TEXT
+ */
+ 
+ void init_font_texture(const char* font_path) {
+    FILE* f = fopen(font_path, "rb");
+	if (!f) {
+		#ifdef DEBUG
+			printf ("! The %s font type is not loaded. \n", font_path);
+		#endif
+		return;
+	}
 
-/* 
- *
+    size_t res = fread(ttf_buffer, 1, 1<<20, f);
+	if (res != 5) {
+		#ifdef DEBUG
+			printf ("! The font type reading is failed. \n");
+		#endif
+	}
+	
+	
+    fclose(f);
+
+    stbtt_BakeFontBitmap(ttf_buffer, 0, 32.0, bitmap, 512, 512, 32, 96, cdata); // 32px font
+
+    glGenTextures(1, &font_texture);
+    glBindTexture(GL_TEXTURE_2D, font_texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 512, 512, 0, GL_ALPHA, GL_UNSIGNED_BYTE, bitmap);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+}
+
+void draw_text(float x, float y, const char* text) {
+	
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, font_texture);
+    glBegin(GL_QUADS);
+
+    while (*text) {
+        if (*text >= 32 && *text < 128) {
+            stbtt_aligned_quad q;
+            stbtt_GetBakedQuad(cdata, 512, 512, *text - 32, &x, &y, &q, 1);
+            glTexCoord2f(q.s0, q.t0); glVertex2f(q.x0, q.y0);
+            glTexCoord2f(q.s1, q.t0); glVertex2f(q.x1, q.y0);
+            glTexCoord2f(q.s1, q.t1); glVertex2f(q.x1, q.y1);
+            glTexCoord2f(q.s0, q.t1); glVertex2f(q.x0, q.y1);
+        }
+        ++text;
+    }
+
+    glEnd();
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_BLEND);
+}
+
+/*!
  * GRID
- *
  */
 
 typedef struct {
@@ -178,6 +170,7 @@ bounds plotc_draw_grid_scale_calc(float* x, float* y, int n) {
 }
 
 static void plotc_draw_grid(float xmin, float xmax, float ymin, float ymax, float margin) {
+	
 	glColor3f(0.8f, 0.8f, 0.8f);
 	glLineWidth(1.0f);
 
@@ -204,10 +197,8 @@ static void plotc_draw_grid(float xmin, float xmax, float ymin, float ymax, floa
 	glEnd();
 }
 
-/*
- * 
+/*!
  * DATA
- *
  */
 static void plotc_draw_data(float* x, float* y, int n, bounds b, float margin) {
 	
@@ -226,36 +217,9 @@ static void plotc_draw_data(float* x, float* y, int n, bounds b, float margin) {
     glEnd();
 }
 
-/*
- *
+/*!
  * DRAW elements
- *
  */
- 
- 
-static void plotc_draw_text_bitmap(const char* text, float x, float y, float scale) {
-    char buffer[99999]; // elég nagy buffer
-    int num_quads;
-
-    num_quads = stb_easy_font_print(
-        x * 100.0f,               // pixelalapú pozícióra konvertálás
-        y * 100.0f,
-        (char*)text,
-        NULL,
-        buffer, sizeof(buffer)
-    );
-
-    glPushMatrix();
-    glScalef(scale / 100.0f, scale / 100.0f, 1.0f); // pixelkoordináta → OpenGL világba
-
-    glColor3f(0.1f, 0.1f, 0.1f); // sötétszürke
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(2, GL_FLOAT, 16, buffer);
-    glDrawArrays(GL_QUADS, 0, num_quads * 4);
-    glDisableClientState(GL_VERTEX_ARRAY);
-
-    glPopMatrix();
-}
  
 
 static void plotc_draw_statusbar(float margin) {
@@ -267,19 +231,15 @@ static void plotc_draw_statusbar(float margin) {
 
     // háttérsáv
     glColor3f(0.9f, 0.9f, 0.9f);
-    glBegin(GL_QUADS);
-        glVertex2f(-1.0f, y0);
-        glVertex2f( 1.0f, y0);
-        glVertex2f( 1.0f, y1);
-        glVertex2f(-1.0f, y1);
-    glEnd();
+	glRectf(-1.0f, y0, 1.0f, y1);
 	
+
 }
 
 void plotc(float* x, float* y, int n, const char* title) {
 	
 	#ifdef _WIN32
-    load_glfw_dll_once();  // ez tölti be a DLL-t és a pointereket
+    loadGlfwDllOnce();  // ez tölti be a DLL-t és a pointereket
 	#endif
 
 	// check
@@ -313,12 +273,16 @@ void plotc(float* x, float* y, int n, const char* title) {
 	// calc bounds of grid
 	
 		bounds b = plotc_draw_grid_scale_calc(x, y, n);
-				
+		
+	// fonts
+	
+		init_font_texture("plotc/font/arial.ttf"); // vagy bármilyen .ttf fájl
+	
 	// window
 		while (!glfwWindowShouldClose_ptr(window)) {	
 			
 			// rendering
-			if (rendering_now) {
+			if (renderingNow) {
 								
 				// default color
 				glClearColor(1, 1, 1, 1);
@@ -341,8 +305,18 @@ void plotc(float* x, float* y, int n, const char* title) {
 				// status bar
 				plotc_draw_statusbar(margin);
 								
+				glMatrixMode(GL_PROJECTION);
+				glLoadIdentity();
+				glOrtho(0, width, height, 0, -1, 1);
+
+				glColor3f(1, 0, 0); // piros szöveg
+				draw_text(1, 40, "Test!");
+
+				//glMatrixMode(GL_MODELVIEW);
+				//glLoadIdentity();				
+					
 				// rendering
-				rendering_now = 0;	
+				renderingNow = 0;	
 				
 				// swap buffer
 				glfwSwapBuffers_ptr(window);
@@ -358,39 +332,3 @@ void plotc(float* x, float* y, int n, const char* title) {
     glfwTerminate_ptr();
 }
 
-/*
-void plot_line(float* x, float* y, int n, const char* title) {
-	
-	#ifdef _WIN32
-		load_glfw_dll_once();
-	#endif
-	
-    if (!glfwInit()) return;
-
-    GLFWwindow* window = glfwCreateWindow(800, 600, title, NULL, NULL);
-    if (!window) {
-        glfwTerminate();
-        return;
-    }
-
-    glfwMakeContextCurrent(window);
-
-    while (!glfwWindowShouldClose(window)) {
-        glClearColor(1, 1, 1, 1);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        glColor3f(0.0f, 0.0f, 1.0f);
-        glBegin(GL_LINE_STRIP);
-        for (int i = 0; i < n; i++) {
-            glVertex2f(x[i], y[i]);
-        }
-        glEnd();
-
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-    }
-
-    glfwDestroyWindow(window);
-    glfwTerminate();
-}
-*/

@@ -1,0 +1,6 @@
+
+/*!
+ * DEBUG mode
+ */
+
+#define DEBUG
