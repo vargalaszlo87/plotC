@@ -246,14 +246,14 @@ static void plotc_draw_statusbar(float margin) {
 	 glRectf(-1.0f, y0, 1.0f, y1);
 }
 
-void plot_text_statusbar() {
+void plot_text_statusbar(char *text) {
 	
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(0, width, height, 0, -1, 1);
 
 	glColor3f(0, 0, 0); // piros szöveg
-	draw_text(8, height - 8, "Mouse position: ");
+	draw_text(8, height - 8, text);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -345,17 +345,20 @@ void plotc(float* x, float* y, int n, const char* title) {
 				plotc_draw_statusbar(margin);
 				
 				// statusbar text
-					char* mouseXStr;
-					char* mouseYStr;
+					char* mouseXStr = (char*)calloc(8, sizeof(char));
+					char* mouseYStr = (char*)calloc(8, sizeof(char));
 					
 					sprintf (mouseXStr, "%d", mouseX);
+					sprintf (mouseYStr, "%d", mouseY);
+					
+					char *statusbarText = (char*)calloc(128, sizeof(char));
 
-					printf ("%s \n",mouseXStr);
+					strcpy(statusbarText, "Mouse position: ");
+					strcat(statusbarText, mouseXStr);
+					strcat(statusbarText, " x ");
+					strcat(statusbarText, mouseYStr);
 
-					//char* mouseXYStr;
-					//strcpy(mouseXYStr, mouseXStr);
-				
-					plot_text_statusbar();
+					plot_text_statusbar(statusbarText);
 															
 				// rendering
 				renderingNow = 0;	
