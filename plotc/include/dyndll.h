@@ -43,6 +43,7 @@ typedef int (*PFN_glfwInit)(void);
 typedef void (*PFN_glfwTerminate)(void);
 typedef GLFWwindow* (*PFN_glfwCreateWindow)(int, int, const char*, void*, void*);
 typedef void (*GLFWframebuffersizefun)(GLFWwindow*, int, int);
+typedef void (*GLFWcursorposfun) (GLFWwindow*, double, double);
 typedef void (*PFN_glfwMakeContextCurrent)(GLFWwindow*);
 typedef int (*PFN_glfwWindowShouldClose)(GLFWwindow*);
 typedef void (*PFN_glfwSwapBuffers)(GLFWwindow*);
@@ -50,6 +51,7 @@ typedef void (*PFN_glfwPollEvents)(void);
 typedef void (*PFN_glfwDestroyWindow)(GLFWwindow*);
 typedef void (*PFN_glfwSetFramebufferSizeCallback)(GLFWwindow*, GLFWframebuffersizefun);
 typedef void (*PFN_glfwGetFramebufferSize)(GLFWwindow*, int*, int*);
+typedef void (*PFN_glfwSetCursorPosCallback)(GLFWwindow*, GLFWcursorposfun);
 
 // ----- Globális mutatók -----
 static PFN_glfwInit glfwInit_ptr;
@@ -62,6 +64,7 @@ static PFN_glfwPollEvents glfwPollEvents_ptr;
 static PFN_glfwDestroyWindow glfwDestroyWindow_ptr;
 static PFN_glfwSetFramebufferSizeCallback glfwSetFramebufferSizeCallback_ptr;
 static PFN_glfwGetFramebufferSize glfwGetFramebufferSize_ptr;
+static PFN_glfwSetCursorPosCallback glfwSetCursorPosCallback_ptr;
 
 static HMODULE glfw = NULL; // globális, hogy a makró is lássa
 
@@ -96,16 +99,17 @@ static void loadGlfwDllOnce() {
             exit(1); \
         }
 
-    LOAD_PROC(glfwInit);
-    LOAD_PROC(glfwTerminate);
-    LOAD_PROC(glfwCreateWindow);
-    LOAD_PROC(glfwMakeContextCurrent);
-    LOAD_PROC(glfwWindowShouldClose);
-    LOAD_PROC(glfwSwapBuffers);
-    LOAD_PROC(glfwPollEvents);
+	LOAD_PROC(glfwInit);
+	LOAD_PROC(glfwTerminate);
+	LOAD_PROC(glfwCreateWindow);
+	LOAD_PROC(glfwMakeContextCurrent);
+	LOAD_PROC(glfwWindowShouldClose);
+	LOAD_PROC(glfwSwapBuffers);
+	LOAD_PROC(glfwPollEvents);
 	LOAD_PROC(glfwDestroyWindow);
 	LOAD_PROC(glfwSetFramebufferSizeCallback);
 	LOAD_PROC(glfwGetFramebufferSize);
+	LOAD_PROC(glfwSetCursorPosCallback);
 
     loaded = 1;
 }

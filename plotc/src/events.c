@@ -38,6 +38,24 @@
 #include "dyndll.h"
 #include "events.h"
 
+void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
+    mouseX = xpos;
+    mouseY = ypos;
+		
+		// re-rendering
+		renderingNow = 1;
+		
+		// ortho
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
+
+    glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+    glLoadIdentity();
+		
+}
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     // Megakadályozzuk a 0 felbontást
     if (height == 0) height = 1;
@@ -47,9 +65,11 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     // Ortografikus vetítés (bal, jobb, lent, fent, near, far)
+		//glOrtho(0, width, height, 0, -1, 1);
     glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
 
     glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
     glLoadIdentity();
 		
 	// re-rendering

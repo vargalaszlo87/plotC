@@ -43,6 +43,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
+#include <string.h>
 
 /*!
  * extern includes
@@ -82,6 +83,8 @@ stbtt_bakedchar cdata[96]; // ASCII 32..126
 static int width;
 static int height;
 
+int mouseX;
+int mouseY;
 
 // methods
 
@@ -239,10 +242,22 @@ static void plotc_draw_statusbar(float margin) {
 	//printf ("%lf", margin);
 
     // háttérsáv
-    glColor3f(0.9f, 0.9f, 0.9f);
-	glRectf(-1.0f, y0, 1.0f, y1);
-	
+   glColor3f(0.9f, 0.9f, 0.9f);
+	 glRectf(-1.0f, y0, 1.0f, y1);
+}
 
+void plot_text_statusbar() {
+	
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(0, width, height, 0, -1, 1);
+
+	glColor3f(0, 0, 0); // piros szöveg
+	draw_text(8, height - 8, "Mouse position: ");
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	
 }
 
 void plotc(float* x, float* y, int n, const char* title) {
@@ -273,8 +288,22 @@ void plotc(float* x, float* y, int n, const char* title) {
 				printf("> address of glfwSetFramebufferSizeCallback : %p\n", glfwSetFramebufferSizeCallback_ptr);
 			#endif
 		}
+		
+		if (!glfwSetCursorPosCallback_ptr) {
+			printf ("! glfwSetCursorPosCallback method is not loaded!\n");
+		}
+		else {
+			glfwSetCursorPosCallback_ptr(window, cursor_position_callback);
+			#ifdef DEBUG
+				printf("> address of glfwSetFramebufferSizeCallback : %p\n", glfwSetCursorPosCallback_ptr);			
+			#endif
+		}
+		
 			
 	// Alap viewport
+	
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		
 		//int width, height;
 		glfwGetFramebufferSize_ptr(window, &width, &height);
@@ -305,7 +334,7 @@ void plotc(float* x, float* y, int n, const char* title) {
 				float margin_x = (float)margin_px / (float)width;
 				float margin_y = (float)margin_px / (float)height;
 				float margin = margin_x < margin_y ? margin_x : margin_y;
-				
+		
 				// grid
 				plotc_draw_grid(b.xmin, b.xmax, b.ymin, b.ymax, margin);  
 
@@ -314,17 +343,20 @@ void plotc(float* x, float* y, int n, const char* title) {
 				
 				// status bar
 				plotc_draw_statusbar(margin);
-								
-				glMatrixMode(GL_PROJECTION);
-				glLoadIdentity();
-				glOrtho(0, width, height, 0, -1, 1);
-
-				glColor3f(1, 0, 0); // piros szöveg
-				draw_text(1, 400, "Test!");
-
-				glMatrixMode(GL_MODELVIEW);
-				glLoadIdentity();
+				
+				// statusbar text
+					char* mouseXStr;
+					char* mouseYStr;
 					
+					sprintf (mouseXStr, "%d", mouseX);
+
+					printf ("%s \n",mouseXStr);
+
+					//char* mouseXYStr;
+					//strcpy(mouseXYStr, mouseXStr);
+				
+					plot_text_statusbar();
+															
 				// rendering
 				renderingNow = 0;	
 				
