@@ -42,38 +42,21 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
     mouseX = xpos;
     mouseY = ypos;
 		
-		// re-rendering
-		renderingNow = 1;
-		
-		// ortho
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
-
-    glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();
-    glLoadIdentity();
+	// re-rendering
+	renderingNow = 1;
 		
 }
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+void framebuffer_size_callback(GLFWwindow* window_local, int w, int h) {
     // Megakadályozzuk a 0 felbontást
-    if (height == 0) height = 1;
-
-    glViewport(0, 0, width, height);
-
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    // Ortografikus vetítés (bal, jobb, lent, fent, near, far)
-		//glOrtho(0, width, height, 0, -1, 1);
-    glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
-
-    glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();
-    glLoadIdentity();
+    if (h == 0) h = 1;
+	
+    glViewport(0, 0, w, h);
 		
 	// re-rendering
 	renderingNow = 1;
+
+    glfwGetFramebufferSize_ptr(window, &width, &height);
 	
 	#ifdef DEBUG
 		printf ("> framebuffer is resized.\n");

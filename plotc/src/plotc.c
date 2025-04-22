@@ -68,6 +68,12 @@
 #include "events.h"
 
 /*!
+ *	defined max values
+ */
+ 
+#define MAX_GRID_LINE 16
+
+/*!
  * global variables
  */
 
@@ -79,14 +85,49 @@ unsigned char bitmap[512*512];
 GLuint font_texture;
 stbtt_bakedchar cdata[96]; // ASCII 32..126
 
-//int width, height;
-static int width;
-static int height;
+GLFWwindow* window;
 
-int mouseX;
-int mouseY;
+//int width, height;
+int width;
+int height;
+
+float
+	// calculated margin in pixel
+	margin,
+
+	// grid 
+	gridPositionModelX[MAX_GRID_LINE],
+	gridPositionModelY[MAX_GRID_LINE];
+
+int
+	// margin in pixel
+	margin_px,
+	
+	// mouse
+	mouseX,
+	mouseY,
+	
+	// grid margin
+	gridPositionProjectionX[MAX_GRID_LINE],
+	gridPositionProjectionY[MAX_GRID_LINE];
+
 
 // methods
+
+void begin_pixel_mode(int width, int height) {
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0, width, height, 0, -1, 1);
+	
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();	
+}
+
+void end_pixel_mode() {
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();	
+}
 
 float plotc_scale(float v, float vmin, float vmax, float margin) {
     return -1.0f + margin * 2 + (v - vmin) / (vmax - vmin) * (2.0f - margin * 4);
@@ -192,6 +233,12 @@ static void plotc_draw_grid(float xmin, float xmax, float ymin, float ymax, floa
 		float x = xmin + i * (xmax - xmin) / 10.0f;
 		float xp = plotc_scale(x, xmin, xmax, margin);
 		
+		// save the positions of Axis-X in Modelview
+		gridPositionModelX[i] = xp;
+		
+		// save the sposition of Axis-X in Projection
+		gridPositionProjectionX[i] = (int)((x - xmin) / (xmax - xmin) * width);
+		
 		glVertex2f(xp, plotc_scale(ymin, ymin, ymax, margin));
 		glVertex2f(xp, plotc_scale(ymax, ymin, ymax, margin));
 	}
@@ -200,12 +247,40 @@ static void plotc_draw_grid(float xmin, float xmax, float ymin, float ymax, floa
 	for (int i = 0; i <= 10; i++) {
 		float y = ymin + i * (ymax - ymin) / 10.0f;
 		float yp = plotc_scale(y, ymin, ymax, margin);
+		
+		// save the positions of Axis-Y in Modelview
+		gridPositionModelY[i] = yp;
+		
+		// save the positions of Axis-Y in Projection
+		gridPositionProjectionY[i] = (int)((1.0f - (y - ymin) / (ymax - ymin)) * height);
 
 		glVertex2f(plotc_scale(xmin, xmin, xmax, margin), yp);
 		glVertex2f(plotc_scale(xmax, xmin, xmax, margin), yp);
 	}
 
 	glEnd();
+}
+
+void draw_crosshair(int mouseX, int mouseY /*, int width, int height*/) {
+			
+    glDisable(GL_TEXTURE_2D);
+    glColor3f(0.5f, 0.5f, 0.5f); // szürke célkereszt
+	glLineWidth(0.5f);
+	
+	begin_pixel_mode(width, height);
+	
+    glBegin(GL_LINES);
+        // függőleges vonal
+        glVertex2i(mouseX, 0 + margin_px);
+        glVertex2i(mouseX, height - margin_px);
+		
+        // vízszintes vonal
+        glVertex2i(0 + margin_px, mouseY);
+        glVertex2i(width - margin_px, mouseY);
+    glEnd();
+	
+	end_pixel_mode();
+	
 }
 
 /*!
@@ -242,22 +317,18 @@ static void plotc_draw_statusbar(float margin) {
 	//printf ("%lf", margin);
 
     // háttérsáv
-   glColor3f(0.9f, 0.9f, 0.9f);
-	 glRectf(-1.0f, y0, 1.0f, y1);
+	glColor3f(0.9f, 0.9f, 0.9f);
+	glRectf(-1.0f, y0, 1.0f, y1);
 }
 
 void plot_text_statusbar(char *text) {
 	
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0, width, height, 0, -1, 1);
+	begin_pixel_mode(width, height);
 
 	glColor3f(0, 0, 0); // piros szöveg
 	draw_text(8, height - 8, text);
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
 	
+	end_pixel_mode();
 }
 
 void plotc(float* x, float* y, int n, const char* title) {
@@ -269,7 +340,7 @@ void plotc(float* x, float* y, int n, const char* title) {
 	// check
 		if (!glfwInit_ptr()) return;
 
-		GLFWwindow* window = glfwCreateWindow_ptr(800, 600, title, NULL, NULL);
+		window = glfwCreateWindow_ptr(800, 600, title, NULL, NULL);
 		if (!window) {
 			glfwTerminate_ptr();
 			return;
@@ -322,6 +393,10 @@ void plotc(float* x, float* y, int n, const char* title) {
 			
 			// rendering
 			if (renderingNow) {
+				
+				glMatrixMode(GL_PROJECTION);
+				glLoadIdentity();
+				glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
 								
 				// default color
 				glClearColor(1, 1, 1, 1);
@@ -330,20 +405,33 @@ void plotc(float* x, float* y, int n, const char* title) {
 				// margin			
 				//float margin = 0.1f;
 				
-				int margin_px = 50;
+				margin_px = 50;
 				float margin_x = (float)margin_px / (float)width;
 				float margin_y = (float)margin_px / (float)height;
-				float margin = margin_x < margin_y ? margin_x : margin_y;
+				margin = margin_x < margin_y ? margin_x : margin_y;
+		
+		// IN WORLD
 		
 				// grid
 				plotc_draw_grid(b.xmin, b.xmax, b.ymin, b.ymax, margin);  
-
+										
 				// data
 				plotc_draw_data(x, y, n, b, margin); 
 				
 				// status bar
 				plotc_draw_statusbar(margin);
+					
+				// rendering
+				renderingNow = 0;	
+												
+				glMatrixMode(GL_MODELVIEW);
+				glPushMatrix();
 				
+			// IN PIXEL
+			
+				// draw crosshair
+				draw_crosshair(mouseX, mouseY/*, width, height*/);
+							
 				// statusbar text
 					char* mouseXStr = (char*)calloc(8, sizeof(char));
 					char* mouseYStr = (char*)calloc(8, sizeof(char));
@@ -358,14 +446,11 @@ void plotc(float* x, float* y, int n, const char* title) {
 					strcat(statusbarText, " x ");
 					strcat(statusbarText, mouseYStr);
 
-					plot_text_statusbar(statusbarText);
-															
-				// rendering
-				renderingNow = 0;	
+				plot_text_statusbar(statusbarText);
 				
 				// swap buffer
 				glfwSwapBuffers_ptr(window);
-													
+				
 			}
 			
 			// poll

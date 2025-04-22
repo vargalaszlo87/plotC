@@ -5,10 +5,19 @@
  * variables
  */
  
+// rendering bit
 extern int renderingNow;
 
+// GLFW window
+extern GLFWwindow* window;
+
+// mouse position
 extern int mouseX;
 extern int mouseY;
+
+// window size
+extern int width;
+extern int height;
 
 /*!
  * methods

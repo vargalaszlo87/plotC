@@ -54,17 +54,17 @@ typedef void (*PFN_glfwGetFramebufferSize)(GLFWwindow*, int*, int*);
 typedef void (*PFN_glfwSetCursorPosCallback)(GLFWwindow*, GLFWcursorposfun);
 
 // ----- Globális mutatók -----
-static PFN_glfwInit glfwInit_ptr;
-static PFN_glfwTerminate glfwTerminate_ptr;
-static PFN_glfwCreateWindow glfwCreateWindow_ptr;
-static PFN_glfwMakeContextCurrent glfwMakeContextCurrent_ptr;
-static PFN_glfwWindowShouldClose glfwWindowShouldClose_ptr;
-static PFN_glfwSwapBuffers glfwSwapBuffers_ptr;
-static PFN_glfwPollEvents glfwPollEvents_ptr;
-static PFN_glfwDestroyWindow glfwDestroyWindow_ptr;
-static PFN_glfwSetFramebufferSizeCallback glfwSetFramebufferSizeCallback_ptr;
-static PFN_glfwGetFramebufferSize glfwGetFramebufferSize_ptr;
-static PFN_glfwSetCursorPosCallback glfwSetCursorPosCallback_ptr;
+PFN_glfwInit glfwInit_ptr;
+PFN_glfwTerminate glfwTerminate_ptr;
+PFN_glfwCreateWindow glfwCreateWindow_ptr;
+PFN_glfwMakeContextCurrent glfwMakeContextCurrent_ptr;
+PFN_glfwWindowShouldClose glfwWindowShouldClose_ptr;
+PFN_glfwSwapBuffers glfwSwapBuffers_ptr;
+PFN_glfwPollEvents glfwPollEvents_ptr;
+PFN_glfwDestroyWindow glfwDestroyWindow_ptr;
+PFN_glfwSetFramebufferSizeCallback glfwSetFramebufferSizeCallback_ptr;
+PFN_glfwGetFramebufferSize glfwGetFramebufferSize_ptr;
+PFN_glfwSetCursorPosCallback glfwSetCursorPosCallback_ptr;
 
 static HMODULE glfw = NULL; // globális, hogy a makró is lássa
 
