@@ -102,6 +102,8 @@ float
 int
 	// margin in pixel
 	margin_px,
+	marginX_px,
+	marginY_px,
 	
 	// mouse
 	mouseX,
@@ -237,10 +239,12 @@ static void plotc_draw_grid(float xmin, float xmax, float ymin, float ymax, floa
 		gridPositionModelX[i] = xp;
 		
 		// save the sposition of Axis-X in Projection
-		gridPositionProjectionX[i] = (int)((x - xmin) / (xmax - xmin) * width);
+		//gridPositionProjectionX[i] = (int)((xp - xmin) / (xmax - xmin) * width);
+		gridPositionProjectionX[i] = (int)((xp + 1.0f) * 0.5f * width);
 		
 		glVertex2f(xp, plotc_scale(ymin, ymin, ymax, margin));
 		glVertex2f(xp, plotc_scale(ymax, ymin, ymax, margin));
+		
 	}
 
 	// Y irányban 11 osztás
@@ -252,7 +256,7 @@ static void plotc_draw_grid(float xmin, float xmax, float ymin, float ymax, floa
 		gridPositionModelY[i] = yp;
 		
 		// save the positions of Axis-Y in Projection
-		gridPositionProjectionY[i] = (int)((1.0f - (y - ymin) / (ymax - ymin)) * height);
+		gridPositionProjectionY[i] = (int)((1.0f - (yp - ymin) / (ymax - ymin)) * height);
 
 		glVertex2f(plotc_scale(xmin, xmin, xmax, margin), yp);
 		glVertex2f(plotc_scale(xmax, xmin, xmax, margin), yp);
@@ -263,6 +267,14 @@ static void plotc_draw_grid(float xmin, float xmax, float ymin, float ymax, floa
 
 void draw_crosshair(int mouseX, int mouseY /*, int width, int height*/) {
 			
+	if (
+		mouseX <= gridPositionProjectionX[0] ||
+		mouseX >= gridPositionProjectionX[10] ||
+		mouseY <= gridPositionProjectionY[10] ||
+		mouseY >= gridPositionProjectionY[0]
+	)
+		return;
+	
     glDisable(GL_TEXTURE_2D);
     glColor3f(0.5f, 0.5f, 0.5f); // szürke célkereszt
 	glLineWidth(0.5f);
@@ -270,13 +282,13 @@ void draw_crosshair(int mouseX, int mouseY /*, int width, int height*/) {
 	begin_pixel_mode(width, height);
 	
     glBegin(GL_LINES);
-        // függőleges vonal
-        glVertex2i(mouseX, 0 + margin_px);
-        glVertex2i(mouseX, height - margin_px);
+        // vertical vonal (the "dummy 0" is just info for me)
+        glVertex2i(mouseX, 0 + gridPositionProjectionY[10]);
+        glVertex2i(mouseX, gridPositionProjectionY[0]);
 		
-        // vízszintes vonal
-        glVertex2i(0 + margin_px, mouseY);
-        glVertex2i(width - margin_px, mouseY);
+        // horizontal vonal (the "dummy 0" is just info for me)
+        glVertex2i(0 + gridPositionProjectionX[0], mouseY);
+        glVertex2i(gridPositionProjectionX[10], mouseY);
     glEnd();
 	
 	end_pixel_mode();
@@ -325,8 +337,8 @@ void plot_text_statusbar(char *text) {
 	
 	begin_pixel_mode(width, height);
 
-	glColor3f(0, 0, 0); // piros szöveg
-	draw_text(8, height - 8, text);
+	glColor3f(0, 0, 0); 
+	draw_text(8, height - 12, text);
 	
 	end_pixel_mode();
 }
@@ -408,7 +420,12 @@ void plotc(float* x, float* y, int n, const char* title) {
 				margin_px = 50;
 				float margin_x = (float)margin_px / (float)width;
 				float margin_y = (float)margin_px / (float)height;
-				margin = margin_x < margin_y ? margin_x : margin_y;
+				margin = margin_x < margin_y ? margin_y : margin_x;
+				
+				marginX_px = 0;
+				marginY_px = 0;
+				
+				//printf ("%lf - %lf", margin_x, margin_y);
 		
 		// IN WORLD
 		
@@ -457,6 +474,8 @@ void plotc(float* x, float* y, int n, const char* title) {
 			glfwPollEvents_ptr();	
 
 		} // end of loop(window)
+		
+		printf ("dev: %d\n",gridPositionProjectionX[0]);
 
     glfwDestroyWindow_ptr(window); 
     glfwTerminate_ptr();
