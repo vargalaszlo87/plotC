@@ -1,13 +1,14 @@
 /*!
  * @project plotC  v.0.1	
- * @file events.c
- * @brief This is the eventhandler of plotC.
+ * @file statusbar.c
+ * @brief This is the tool of statusbar.
  *
  * Version information:
  *
  *
  * Features:
- * - resizable callback
+ * - gray rectangle
+ * - mouse position
  *
  * @author Varga Laszlo
  *
@@ -15,7 +16,7 @@
  * @website http://vargalaszlo.com
  * @website http://ha1cx.hu
  *
- * @date 2025-04-16
+ * @date 2025-04-26
  *
  * @license
  * This program is free software: you can redistribute it and/or modify it
@@ -35,30 +36,24 @@
 
 #include "debug.h"
 #include "glfw3.h"  
-#include "dyndll.h"
-#include "events.h"
+#include "statusbar.h"
 
-void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
-    mouseX = xpos;
-    mouseY = ypos;
-		
-	// re-rendering
-	renderingNow = 1;
-		
+void plotc_draw_statusbar(float margin) {
+    float bar_height = 0.1f; // OpenGL koordináta-térben
+    float y0 = -1.0f;
+    float y1 = y0 + margin * 1.5;
+
+    // háttérsáv
+		glColor3f(0.9f, 0.9f, 0.9f);
+		glRectf(-1.0f, y0, 1.0f, y1);
 }
 
-void framebuffer_size_callback(GLFWwindow* window_local, int w, int h) {
-    // Megakadályozzuk a 0 felbontást
-    if (h == 0) h = 1;
+void plot_text_statusbar(char *text) {
 	
-    glViewport(0, 0, w, h);
-		
-	// re-rendering
-	renderingNow = 1;
+	begin_pixel_mode(width, height);
 
-    glfwGetFramebufferSize_ptr(window, &width, &height);
+	glColor3f(0, 0, 0); 
+	draw_text(8, height - 12, text);
 	
-	#ifdef DEBUG
-		printf ("> framebuffer is resized.\n");
-	#endif
+	end_pixel_mode();
 }
