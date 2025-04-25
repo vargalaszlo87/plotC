@@ -35,7 +35,9 @@
 
 #include "debug.h"
 #include "glfw3.h"  
+
 #include "dyndll.h"
+
 #include "events.h"
 
 void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
