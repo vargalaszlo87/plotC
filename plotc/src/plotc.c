@@ -197,6 +197,13 @@ void plotc(float* x, float* y, int n, const char* title) {
 	// fonts
 	
 		init_font_texture("plotc/font/arial.ttf"); // vagy bármilyen .ttf fájl
+		
+	// DEV:
+		int i = 0;
+		while(i < 200) {
+			printf ("x: %f - y:%f\n", x[i], y[i]);
+			i++;
+		}
 	
 	// window
 		while (!glfwWindowShouldClose_ptr(window)) {	
@@ -247,22 +254,39 @@ void plotc(float* x, float* y, int n, const char* title) {
 				// draw crosshair
 				draw_crosshair(mouseX, mouseY/*, width, height*/);
 							
-				// statusbar text
-					char* mouseXStr = (char*)calloc(8, sizeof(char));
-					char* mouseYStr = (char*)calloc(8, sizeof(char));
-					
-					sprintf (mouseXStr, "%d", mouseX);
-					sprintf (mouseYStr, "%d", mouseY);
-					
-					char *statusbarText = (char*)calloc(128, sizeof(char));
-
-					strcpy(statusbarText, "Mouse position: ");
-					strcat(statusbarText, mouseXStr);
-					strcat(statusbarText, " x ");
-					strcat(statusbarText, mouseYStr);
-
-				plot_text_statusbar(statusbarText);
+				// DEV (inline)
 				
+					if (
+						mouseX <= gridPositionProjectionX[0] ||
+						mouseX >= gridPositionProjectionX[10] ||
+						mouseY <= gridPositionProjectionY[10] ||
+						mouseY >= gridPositionProjectionY[0]
+					) {
+						plot_text_statusbar("Mouse position: Out of range.");
+					}
+					else {
+						
+						// statusbar text
+							char* mouseXStr = (char*)calloc(8, sizeof(char));
+							char* mouseYStr = (char*)calloc(8, sizeof(char));
+							
+							sprintf (mouseXStr, "%d", mouseX);
+							sprintf (mouseYStr, "%d", mouseY);
+							
+							char *statusbarText = (char*)calloc(128, sizeof(char));
+
+							strcpy(statusbarText, "Mouse position: ");
+							strcat(statusbarText, mouseXStr);
+							strcat(statusbarText, " x ");
+							strcat(statusbarText, mouseYStr);
+
+						plot_text_statusbar(statusbarText);
+										
+						
+					}
+					
+				
+
 				// swap buffer
 				glfwSwapBuffers_ptr(window);
 				
@@ -273,8 +297,6 @@ void plotc(float* x, float* y, int n, const char* title) {
 
 		} // end of loop(window)
 		
-		printf ("dev: %d\n",gridPositionProjectionX[0]);
-
     glfwDestroyWindow_ptr(window); 
     glfwTerminate_ptr();
 }
