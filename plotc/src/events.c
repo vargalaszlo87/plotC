@@ -39,8 +39,14 @@
 #include "events.h"
 
 void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
+
+	// position in full window
     mouseX = xpos;
     mouseY = ypos;
+
+	// position inside grid (LEFT, BOTTOM -> UP, RIGHT
+	mouseXinGrid = mouseX - (int)gridPositionProjectionX[0];
+	mouseYinGrid = height - mouseY - (int)gridPositionProjectionY[10];
 		
 	// re-rendering
 	renderingNow = 1;

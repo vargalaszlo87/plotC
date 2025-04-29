@@ -36,11 +36,13 @@ extern void begin_pixel_mode(int, int);
 extern void end_pixel_mode();
  
 float plotc_scale(float, float, float, float);
+float plotc_unscale(float, float, float, float, int);
 bounds plotc_draw_grid_scale_calc(float*, float*, int);
 void plotc_draw_grid(float, float, float, float, float);
 void plotc_draw_data(float*, float*, int, bounds, float);
 void draw_text(float, float, const char*);
 void draw_crosshair(int, int);
 void init_font_texture(const char*);
+
 
 #endif

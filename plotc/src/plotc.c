@@ -103,6 +103,10 @@ int
 	// mouse
 	mouseX,
 	mouseY,
+
+	// mouse inside grid
+	mouseXinGrid,
+	mouseYinGrid,
 	
 	// grid margin
 	gridPositionProjectionX[16],
@@ -196,11 +200,12 @@ void plotc(float* x, float* y, int n, const char* title) {
 		init_font_texture("plotc/font/arial.ttf"); // vagy bármilyen .ttf fájl
 		
 	// DEV:
-		int i = 0;
+/*		int i = 0;
 		while(i < 200) {
 			printf ("x: %f - y:%f\n", x[i], y[i]);
 			i++;
 		}
+*/
 	
 	// window
 		while (!glfwWindowShouldClose_ptr(window)) {	
@@ -262,20 +267,19 @@ void plotc(float* x, float* y, int n, const char* title) {
 						plot_text_statusbar("Mouse position: Out of range.");
 					}
 					else {
-						
+
+						float xval = plotc_unscale(mouseX, b.xmin, b.xmax, margin, width);
+
 						// statusbar text
-							char* mouseXStr = (char*)calloc(8, sizeof(char));
-							char* mouseYStr = (char*)calloc(8, sizeof(char));
-							
-							sprintf (mouseXStr, "%d", mouseX - (int)gridPositionProjectionX[0]);
-							sprintf (mouseYStr, "%d", height - mouseY - (int)gridPositionProjectionY[10]);
+							char* mouseXinGridStr = (char*)calloc(8, sizeof(char));
+							char* mouseYinGridStr = (char*)calloc(8, sizeof(char));
+						
+							sprintf (mouseXinGridStr, "%d", mouseXinGrid);
+							sprintf (mouseYinGridStr, "%d", mouseYinGrid);
 							
 							char *statusbarText = (char*)calloc(128, sizeof(char));
 
-							strcpy(statusbarText, "Mouse position: ");
-							strcat(statusbarText, mouseXStr);
-							strcat(statusbarText, " x ");
-							strcat(statusbarText, mouseYStr);
+							sprintf(statusbarText, "Mouse position: %s x %s",mouseXinGridStr, mouseYinGridStr);
 
 						plot_text_statusbar(statusbarText);
 										

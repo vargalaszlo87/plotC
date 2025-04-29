@@ -57,10 +57,18 @@ GLuint font_texture;
 float plotc_scale(float v, float vmin, float vmax, float margin) {
 	float
 		range = vmax - vmin,
-		normalized = (v - vmin) / range,
+		normalize = (v - vmin) / range,
 		span = 1.0f - 2.0f * margin;
-	return -1.0f + margin * 2.0f + normalized * span * 2.0f;
-//    return -1.0f + margin * 2 + (v - vmin) / (vmax - vmin) * (2.0f - margin * 4);
+	return -1.0f + margin * 2.0f + normalize * span * 2.0f;
+
+}
+
+float plotc_unscale(float screenX, float vmin, float vmax, float margin, int width) {
+    float 
+		span = 2.0f - margin * 4.0f,      // ugyanaz, mint a scale-ben
+		normalize = (screenX / (float)width),  // 0.0 → 1.0 pixelpozíció
+		ndc = normalize * span + (-1.0f + margin * 2.0f);  // vissza NDC-be
+    return vmin + (ndc + 1.0f) / 2.0f * (vmax - vmin);  // vissza eredeti adatra
 }
 
 /*!
