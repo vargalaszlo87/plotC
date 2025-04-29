@@ -39,8 +39,6 @@ int main() {
 	while (++i <= s) {
 		*(x + i) = i * dt;
 		*(y + i) = A * sin(2 * M_PI * f * *(x + i));
-
-		printf ("x: %lf --> y: %lf\n",x[i], y[i]);
 	}
 
 	// plotC
