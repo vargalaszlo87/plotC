@@ -131,6 +131,18 @@ void end_pixel_mode() {
     glPopMatrix();	
 }
 
+/* DEV */
+
+float get_y_from_x(float* x, float* y, int n, float xval) {
+    for (int i = 0; i < n - 1; i++) {
+        if (xval >= x[i] && xval <= x[i + 1]) {
+            float t = (xval - x[i]) / (x[i + 1] - x[i]);
+            return y[i] + t * (y[i + 1] - y[i]);  // lineáris interpoláció
+        }
+    }
+    return 0.0f;  // ha kívül van, vissza 0 vagy hibajelzés
+}
+
 /*!
  * Main function of plotC
  */
@@ -199,14 +211,6 @@ void plotc(float* x, float* y, int n, const char* title) {
 	
 		init_font_texture("plotc/font/arial.ttf"); // vagy bármilyen .ttf fájl
 		
-	// DEV:
-/*		int i = 0;
-		while(i < 200) {
-			printf ("x: %f - y:%f\n", x[i], y[i]);
-			i++;
-		}
-*/
-	
 	// window
 		while (!glfwWindowShouldClose_ptr(window)) {	
 			
@@ -232,7 +236,6 @@ void plotc(float* x, float* y, int n, const char* title) {
 				marginX_px = 0;
 				marginY_px = 0;
 				
-				//printf ("%lf - %lf", margin_x, margin_y);
 		
 		// IN WORLD
 		
@@ -244,6 +247,9 @@ void plotc(float* x, float* y, int n, const char* title) {
 				
 				// status bar
 				plotc_draw_statusbar(margin);
+
+				// red dot
+				plotc_draw_probe_dot(x, y, n, mouseX, width, b, margin);
 					
 				// rendering
 				renderingNow = 0;	
@@ -269,6 +275,7 @@ void plotc(float* x, float* y, int n, const char* title) {
 					else {
 
 						float xval = plotc_unscale(mouseX, b.xmin, b.xmax, margin, width);
+						float yval = get_y_from_x(x, y, 1000, xval);
 
 						// statusbar text
 							char* mouseXinGridStr = (char*)calloc(8, sizeof(char));
@@ -278,12 +285,10 @@ void plotc(float* x, float* y, int n, const char* title) {
 							sprintf (mouseYinGridStr, "%d", mouseYinGrid);
 							
 							char *statusbarText = (char*)calloc(128, sizeof(char));
+							sprintf(statusbarText, "Mouse position: %s x %s  \t  Y[x] value = %lf",mouseXinGridStr, mouseYinGridStr, yval);
 
-							sprintf(statusbarText, "Mouse position: %s x %s",mouseXinGridStr, mouseYinGridStr);
+							plot_text_statusbar(statusbarText);
 
-						plot_text_statusbar(statusbarText);
-										
-						
 					}
 					
 				

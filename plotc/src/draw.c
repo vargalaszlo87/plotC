@@ -56,19 +56,20 @@ GLuint font_texture;
  
 float plotc_scale(float v, float vmin, float vmax, float margin) {
 	float
-		range = vmax - vmin,
+		range = vmax - vmin;
+		if (range == 0.0f) return 0.0f; // védekezés, ne osszon nullával
+	float
 		normalize = (v - vmin) / range,
 		span = 1.0f - 2.0f * margin;
 	return -1.0f + margin * 2.0f + normalize * span * 2.0f;
 
 }
 
-float plotc_unscale(float screenX, float vmin, float vmax, float margin, int width) {
-    float 
-		span = 2.0f - margin * 4.0f,      // ugyanaz, mint a scale-ben
-		normalize = (screenX / (float)width),  // 0.0 → 1.0 pixelpozíció
-		ndc = normalize * span + (-1.0f + margin * 2.0f);  // vissza NDC-be
-    return vmin + (ndc + 1.0f) / 2.0f * (vmax - vmin);  // vissza eredeti adatra
+float plotc_unscale(int pixel, float vmin, float vmax, float margin, int width) {
+    float span = 1.0f - 2.0f * margin;
+    float ndc = ((float)pixel / (float)width) * 2.0f - 1.0f;
+    float normalize = (ndc - (-1.0f + margin * 2.0f)) / (span * 2.0f);
+    return vmin + normalize * (vmax - vmin);
 }
 
 /*!
@@ -247,6 +248,41 @@ void plotc_draw_data(float* x, float* y, int n, bounds b, float margin) {
 		}
 		
     glEnd();
+}
+
+/*! 
+ * Red dot
+*/
+
+void plotc_draw_probe_dot(float* x, float* y, int n, int mouseX, int width, bounds b, float margin) {
+	// Ellenőrzés: egér X pixel benne van a grid területen
+	if (
+		mouseX < gridPositionProjectionX[0] ||
+		mouseX > gridPositionProjectionX[10]
+	) {
+		return;
+	}
+
+	// 1. Egér X → adatvilág X érték
+	float xval = plotc_unscale(mouseX, b.xmin, b.xmax, margin, width);
+
+	// 2. Adatvilág X → Y érték interpolációval
+	float yval = get_y_from_x(x, y, n, xval);
+
+	// 3. Skálázás OpenGL világba
+	float xp = plotc_scale(xval, b.xmin, b.xmax, margin);
+	float yp = plotc_scale(yval, b.ymin, b.ymax, margin);
+
+	// 4. Rajz: OpenGL világban, nem pixelben
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glDisable(GL_TEXTURE_2D); // ha esetleg bekapcsolva maradt
+
+	glPointSize(12.0f);
+	glColor3f(1.0f, 0.0f, 0.0f);
+	glBegin(GL_POINTS);
+	glVertex2f(xp, yp);
+	glEnd();
 }
 
 
