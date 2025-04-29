@@ -55,7 +55,12 @@ GLuint font_texture;
  */
  
 float plotc_scale(float v, float vmin, float vmax, float margin) {
-    return -1.0f + margin * 2 + (v - vmin) / (vmax - vmin) * (2.0f - margin * 4);
+	float
+		range = vmax - vmin,
+		normalized = (v - vmin) / range,
+		span = 1.0f - 2.0f * margin;
+	return -1.0f + margin * 2.0f + normalized * span * 2.0f;
+//    return -1.0f + margin * 2 + (v - vmin) / (vmax - vmin) * (2.0f - margin * 4);
 }
 
 /*!
@@ -97,7 +102,6 @@ void plotc_draw_grid(float xmin, float xmax, float ymin, float ymax, float margi
 		gridPositionModelX[i] = xp;
 		
 		// save the sposition of Axis-X in Projection
-		//gridPositionProjectionX[i] = (int)((xp - xmin) / (xmax - xmin) * width);
 		gridPositionProjectionX[i] = (int)((xp + 1.0f) * 0.5f * width);
 		
 		glVertex2f(xp, plotc_scale(ymin, ymin, ymax, margin));
@@ -114,7 +118,7 @@ void plotc_draw_grid(float xmin, float xmax, float ymin, float ymax, float margi
 		gridPositionModelY[i] = yp;
 		
 		// save the positions of Axis-Y in Projection
-		gridPositionProjectionY[i] = (int)((1.0f - (yp - ymin) / (ymax - ymin)) * height);
+		gridPositionProjectionY[i] = (int)((1.0f - yp) * 0.5f * height);
 
 		glVertex2f(plotc_scale(xmin, xmin, xmax, margin), yp);
 		glVertex2f(plotc_scale(xmax, xmin, xmax, margin), yp);

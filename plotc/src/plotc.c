@@ -81,11 +81,8 @@
  
 int renderingNow = 1;
 
-
-
 GLFWwindow* window;
 
-//int width, height;
 int width;
 int height;
 
@@ -270,8 +267,8 @@ void plotc(float* x, float* y, int n, const char* title) {
 							char* mouseXStr = (char*)calloc(8, sizeof(char));
 							char* mouseYStr = (char*)calloc(8, sizeof(char));
 							
-							sprintf (mouseXStr, "%d", mouseX);
-							sprintf (mouseYStr, "%d", mouseY);
+							sprintf (mouseXStr, "%d", mouseX - (int)gridPositionProjectionX[0]);
+							sprintf (mouseYStr, "%d", height - mouseY - (int)gridPositionProjectionY[10]);
 							
 							char *statusbarText = (char*)calloc(128, sizeof(char));
 
