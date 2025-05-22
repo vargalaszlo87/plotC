@@ -2,6 +2,7 @@
 #define DRAW_H
 
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "stb_truetype.h"
 
@@ -45,6 +46,7 @@ void draw_text(float, float, const char*);
 void draw_crosshair(int, int);
 void init_font_texture(const char*);
 void plotc_draw_probe_dot(float*, float*, int, int, int, bounds, float);
+bool mouse_in_range();
 
 
 #endif

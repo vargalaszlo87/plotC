@@ -72,6 +72,18 @@ float plotc_unscale(int pixel, float vmin, float vmax, float margin, int width) 
     return vmin + normalize * (vmax - vmin);
 }
 
+bool mouse_in_range() {
+	if (
+		mouseX <= gridPositionProjectionX[0] ||
+		mouseX >= gridPositionProjectionX[10] ||
+		mouseY <= gridPositionProjectionY[10] ||
+		mouseY >= gridPositionProjectionY[0]
+	)
+		return false;
+	else
+		return true;
+}
+
 /*!
  * Grid functions
  */

@@ -249,7 +249,8 @@ void plotc(float* x, float* y, int n, const char* title) {
 				plotc_draw_statusbar(margin);
 
 				// red dot
-				plotc_draw_probe_dot(x, y, n, mouseX, width, b, margin);
+				if (mouse_in_range())
+					plotc_draw_probe_dot(x, y, n, mouseX, width, b, margin);
 					
 				// rendering
 				renderingNow = 0;	
@@ -264,12 +265,7 @@ void plotc(float* x, float* y, int n, const char* title) {
 							
 				// DEV (inline)
 				
-					if (
-						mouseX <= gridPositionProjectionX[0] ||
-						mouseX >= gridPositionProjectionX[10] ||
-						mouseY <= gridPositionProjectionY[10] ||
-						mouseY >= gridPositionProjectionY[0]
-					) {
+					if (mouse_in_range()) {
 						plot_text_statusbar("Mouse position: Out of range.");
 					}
 					else {
