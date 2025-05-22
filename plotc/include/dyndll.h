@@ -29,6 +29,8 @@ typedef void (*PFN_glfwDestroyWindow)(GLFWwindow*);
 typedef void (*PFN_glfwSetFramebufferSizeCallback)(GLFWwindow*, GLFWframebuffersizefun);
 typedef void (*PFN_glfwGetFramebufferSize)(GLFWwindow*, int*, int*);
 typedef void (*PFN_glfwSetCursorPosCallback)(GLFWwindow*, GLFWcursorposfun);
+typedef void (*PFN_glfwWindowHint)(int, int); 	
+typedef const char* (*PFN_glfwGetError)(int*);
 
 // ----- Csak extern deklarációk -----
 extern PFN_glfwInit glfwInit_ptr;
@@ -42,6 +44,8 @@ extern PFN_glfwDestroyWindow glfwDestroyWindow_ptr;
 extern PFN_glfwSetFramebufferSizeCallback glfwSetFramebufferSizeCallback_ptr;
 extern PFN_glfwGetFramebufferSize glfwGetFramebufferSize_ptr;
 extern PFN_glfwSetCursorPosCallback glfwSetCursorPosCallback_ptr;
+extern PFN_glfwWindowHint glfwWindowHint_ptr;
+extern PFN_glfwGetError glfwGetError_ptr;
 
 // A DLL betöltő függvény deklarációja
 void loadGlfwDllOnce(void);

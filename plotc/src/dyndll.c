@@ -20,6 +20,8 @@ PFN_glfwDestroyWindow glfwDestroyWindow_ptr = NULL;
 PFN_glfwSetFramebufferSizeCallback glfwSetFramebufferSizeCallback_ptr = NULL;
 PFN_glfwGetFramebufferSize glfwGetFramebufferSize_ptr = NULL;
 PFN_glfwSetCursorPosCallback glfwSetCursorPosCallback_ptr = NULL;
+PFN_glfwWindowHint glfwWindowHint_ptr = NULL;
+PFN_glfwGetError glfwGetError_ptr = NULL;
 
 static HMODULE glfw = NULL;
 
@@ -63,6 +65,8 @@ void loadGlfwDllOnce(void) {
     LOAD_PROC(glfwSetFramebufferSizeCallback);
     LOAD_PROC(glfwGetFramebufferSize);
     LOAD_PROC(glfwSetCursorPosCallback);
+	LOAD_PROC(glfwWindowHint);
+	LOAD_PROC(glfwGetError);
 
     loaded = 1;
 }

@@ -35,7 +35,7 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
- 
+  
 #define GL_IMPLEMENTATION
 #include <GL/gl.h>
 
@@ -151,6 +151,7 @@ float get_y_from_x(float* x, float* y, int n, float xval) {
 void plotc(float* x, float* y, int n, const char* title) {
 	
 	#ifdef _WIN32
+	//loadOpenGlDllOnce();	// openGL DLL betöltés
     loadGlfwDllOnce();  // ez tölti be a DLL-t és a pointereket
 	#endif
 
@@ -163,8 +164,22 @@ void plotc(float* x, float* y, int n, const char* title) {
 		char windowTitle[128] = {0};
 		snprintf(windowTitle, sizeof(windowTitle), "%s - %s (ver. %s)", title, PLOTC_NAME, PLOTC_VER);
 		
+		glfwWindowHint_ptr(GLFW_CONTEXT_VERSION_MAJOR, 2); // v2.0 minimum
+		glfwWindowHint_ptr(GLFW_CONTEXT_VERSION_MINOR, 0);
+		
 		window = glfwCreateWindow_ptr(800, 600, windowTitle, NULL, NULL);
+		
 		if (!window) {
+			int errcode;
+			const char* errmsg = glfwGetError_ptr(&errcode);
+			printf("! glfwCreateWindow_ptr() failed. Error %d: %s\n", errcode, errmsg ? errmsg : "unknown");
+			glfwTerminate_ptr();
+			return;
+		}
+				
+		
+		if (!window) {
+			printf ("Baj van...");
 			glfwTerminate_ptr();
 			return;
 		}
@@ -265,7 +280,7 @@ void plotc(float* x, float* y, int n, const char* title) {
 							
 				// DEV (inline)
 				
-					if (mouse_in_range()) {
+					if (!mouse_in_range()) {
 						plot_text_statusbar("Mouse position: Out of range.");
 					}
 					else {
