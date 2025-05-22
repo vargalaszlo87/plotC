@@ -277,6 +277,9 @@ void plotc(float* x, float* y, int n, const char* title) {
 			
 				// draw crosshair
 				draw_crosshair(mouseX, mouseY/*, width, height*/);
+				
+				// tengelycímkék
+plotc_draw_axis_labels("Ido [s]", "Amplitudo [V]");
 							
 				// DEV (inline)
 				

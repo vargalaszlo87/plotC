@@ -42,6 +42,7 @@ float plotc_unscale(int, float, float, float, int);
 bounds plotc_draw_grid_scale_calc(float*, float*, int);
 void plotc_draw_grid(float, float, float, float, float);
 void plotc_draw_data(float*, float*, int, bounds, float);
+void plotc_draw_axis_labels(const char*, const char*);
 void draw_text(float, float, const char*);
 void draw_crosshair(int, int);
 void init_font_texture(const char*);

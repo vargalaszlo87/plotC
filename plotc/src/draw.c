@@ -207,6 +207,27 @@ void draw_text(float x, float y, const char* text) {
     glDisable(GL_BLEND);
 }
 
+void plotc_draw_axis_labels(const char* xlabel, const char* ylabel) {
+    begin_pixel_mode(width, height);
+    glColor3f(0, 0, 0);  // fekete szöveg
+
+    // --- X tengelycímke: középre lentre ---
+    int x_pos = width / 2 - strlen(xlabel) * 4;  // kb. középre igazítás
+    int y_pos = height - 30;
+    draw_text((float)x_pos, (float)y_pos, xlabel);
+
+    // --- Y tengelycímke: balra, középre függőlegesen (karakterenként írjuk le) ---
+    int x_y_label = 10;
+    int y_y_label = height / 2 - (strlen(ylabel) * 8 / 2);
+
+    for (int i = 0; ylabel[i] != '\0'; i++) {
+        char s[2] = { ylabel[i], 0 };
+        draw_text((float)x_y_label, (float)(y_y_label + i * 12), s);
+    }
+
+    end_pixel_mode();
+}
+
 /*!
  * Crosshair
  */
