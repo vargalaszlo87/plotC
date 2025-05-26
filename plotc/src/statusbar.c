@@ -41,7 +41,7 @@
 void plotc_draw_statusbar(float margin) {
     float bar_height = 0.1f; // OpenGL koordináta-térben
     float y0 = -1.0f;
-    float y1 = y0 + margin * 1.5;
+    float y1 = y0 + margin * 1.2; // * Constant
 
     // háttérsáv
 		glColor3f(0.9f, 0.9f, 0.9f);
@@ -53,7 +53,7 @@ void plot_text_statusbar(char *text) {
 	begin_pixel_mode(width, height);
 
 	glColor3f(0, 0, 0); 
-	draw_text(8, height - 12, text);
+	draw_text(8, height - 8, text);
 	
 	end_pixel_mode();
 }

@@ -107,6 +107,7 @@ bounds plotc_draw_grid_scale_calc(float* x, float* y, int n) {
 	return b; 
 }
 
+/*
 void plotc_draw_grid(float xmin, float xmax, float ymin, float ymax, float margin) {
 	
 	glColor3f(0.8f, 0.8f, 0.8f);
@@ -147,6 +148,47 @@ void plotc_draw_grid(float xmin, float xmax, float ymin, float ymax, float margi
 
 	glEnd();
 } 
+*/
+
+void plotc_draw_grid(float xmin, float xmax, float ymin, float ymax, float margin_x, float margin_y) {
+	
+	glColor3f(0.8f, 0.8f, 0.8f);
+	glLineWidth(1.0f);
+
+	glBegin(GL_LINES);
+
+	// X irányban 11 osztás (10 köz)
+	for (int i = 0; i <= 10; i++) {
+		float x = xmin + i * (xmax - xmin) / 10.0f;
+		float xp = plotc_scale(x, xmin, xmax, margin_x);
+		
+		// save the positions of Axis-X in Modelview
+		gridPositionModelX[i] = xp;
+		
+		// save the positions of Axis-X in Projection
+		gridPositionProjectionX[i] = (int)((xp + 1.0f) * 0.5f * width);
+		
+		glVertex2f(xp, plotc_scale(ymin, ymin, ymax, margin_y));
+		glVertex2f(xp, plotc_scale(ymax, ymin, ymax, margin_y));
+	}
+
+	// Y irányban 11 osztás
+	for (int i = 0; i <= 10; i++) {
+		float y = ymin + i * (ymax - ymin) / 10.0f;
+		float yp = plotc_scale(y, ymin, ymax, margin_y);
+		
+		// save the positions of Axis-Y in Modelview
+		gridPositionModelY[i] = yp;
+		
+		// save the positions of Axis-Y in Projection
+		gridPositionProjectionY[i] = (int)((1.0f - yp) * 0.5f * height);
+
+		glVertex2f(plotc_scale(xmin, xmin, xmax, margin_x), yp);
+		glVertex2f(plotc_scale(xmax, xmin, xmax, margin_x), yp);
+	}
+
+	glEnd();
+}
 
 /*!
  * Text functions
@@ -213,7 +255,7 @@ void plotc_draw_axis_labels(const char* xlabel, const char* ylabel) {
 
     // --- X tengelycímke: középre lentre ---
     int x_pos = width / 2 - strlen(xlabel) * 4;  // kb. középre igazítás
-    int y_pos = height - 30;
+    int y_pos = height - 40;
     draw_text((float)x_pos, (float)y_pos, xlabel);
 
     // --- Y tengelycímke: balra, középre függőlegesen (karakterenként írjuk le) ---
@@ -266,7 +308,7 @@ void draw_crosshair(int mouseX, int mouseY) {
  * Data display functions
  */
  
-void plotc_draw_data(float* x, float* y, int n, bounds b, float margin) {
+void plotc_draw_data(float* x, float* y, int n, bounds b, float margin_x, float margin_y) {
 	
 	// color, line
 		glColor3f(0.0f, 0.0f, 1.0f);
@@ -275,8 +317,8 @@ void plotc_draw_data(float* x, float* y, int n, bounds b, float margin) {
 	// fill data
 		glBegin(GL_LINE_STRIP);
 		for (int i = 0; i < n; i++) {
-			float xp = plotc_scale(x[i], b.xmin, b.xmax, margin);
-			float yp = plotc_scale(y[i], b.ymin, b.ymax, margin);
+			float xp = plotc_scale(x[i], b.xmin, b.xmax, margin_x);
+			float yp = plotc_scale(y[i], b.ymin, b.ymax, margin_y);
 			glVertex2f(xp, yp);
 		}
 		

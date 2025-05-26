@@ -89,6 +89,9 @@ int height;
 float
 	// calculated margin in pixel
 	margin,
+	
+	// margin-Y space 
+	marginSpace = 1.2,
 
 	// grid 
 	gridPositionModelX[16],
@@ -245,8 +248,11 @@ void plotc(float* x, float* y, int n, const char* title) {
 				
 				margin_px = 50;
 				float margin_x = (float)margin_px / (float)width;
-				float margin_y = (float)margin_px / (float)height;
+				float margin_y = ((float)margin_px / (float)height * marginSpace);
 				margin = margin_x < margin_y ? margin_y : margin_x;
+				
+				printf ("\n>%lf", margin);
+				margin += 0.1;
 				
 				marginX_px = 0;
 				marginY_px = 0;
@@ -255,13 +261,13 @@ void plotc(float* x, float* y, int n, const char* title) {
 		// IN WORLD
 		
 				// grid
-				plotc_draw_grid(b.xmin, b.xmax, b.ymin, b.ymax, margin);  
+				plotc_draw_grid(b.xmin, b.xmax, b.ymin, b.ymax, margin_x, margin_y);  // margin 
 										
 				// data
-				plotc_draw_data(x, y, n, b, margin); 
+				plotc_draw_data(x, y, n, b, margin_x, margin_y); 
 				
 				// status bar
-				plotc_draw_statusbar(margin);
+				plotc_draw_statusbar(margin_y / marginSpace);
 
 				// red dot
 				if (mouse_in_range())
