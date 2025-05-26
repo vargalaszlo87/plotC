@@ -48,7 +48,8 @@ void plotc_draw_axis_labels(const char*, const char*);
 void draw_text(float, float, const char*);
 void draw_crosshair(int, int);
 void init_font_texture(const char*);
-void plotc_draw_probe_dot(float*, float*, int, int, int, bounds, float);
+void plotc_draw_probe_dot(float*, float*, int, int, int, bounds, float, float);
+// dev void plotc_draw_probe_dot(float*, float*, int, int, int, bounds, float);
 bool mouse_in_range();
 
 

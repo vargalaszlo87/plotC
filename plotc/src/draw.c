@@ -249,6 +249,7 @@ void draw_text(float x, float y, const char* text) {
     glDisable(GL_BLEND);
 }
 
+/*
 void plotc_draw_axis_labels(const char* xlabel, const char* ylabel) {
     begin_pixel_mode(width, height);
     glColor3f(0, 0, 0);  // fekete szöveg
@@ -266,6 +267,34 @@ void plotc_draw_axis_labels(const char* xlabel, const char* ylabel) {
         char s[2] = { ylabel[i], 0 };
         draw_text((float)x_y_label, (float)(y_y_label + i * 12), s);
     }
+
+    end_pixel_mode();
+}
+*/
+
+void plotc_draw_axis_labels(const char* xlabel, const char* ylabel) {
+    begin_pixel_mode(width, height);
+    glColor3f(0, 0, 0);  // fekete szöveg
+
+    // --- X tengelycímke: középre lentre ---
+    int x_pos = width / 2 - strlen(xlabel) * 4;  // kb. középre igazítás
+    int y_pos = height - 40;
+    draw_text((float)x_pos, (float)y_pos, xlabel);
+
+    // --- Y tengelycímke: 90 fokkal elforgatva ---
+    glPushMatrix();
+
+        // eltolás: kb. bal szél, középmagasság
+        glTranslatef(20.0f, height / 2.0f, 0.0f);  // balról kicsit beljebb, középmagasságban
+
+        // forgatás óramutató járásával ellentétesen (OpenGL koordinátarendszerben)
+        glRotatef(-90.0f, 0.0f, 0.0f, 1.0f);
+
+        // szöveg balra, kb. középre igazítás
+        int text_width = strlen(ylabel) * 8;
+        draw_text((float)(-text_width / 2), 0.0f, ylabel);
+
+    glPopMatrix();
 
     end_pixel_mode();
 }
@@ -329,7 +358,7 @@ void plotc_draw_data(float* x, float* y, int n, bounds b, float margin_x, float 
  * Red dot
 */
 
-void plotc_draw_probe_dot(float* x, float* y, int n, int mouseX, int width, bounds b, float margin) {
+void plotc_draw_probe_dot(float* x, float* y, int n, int mouseX, int width, bounds b, float margin_x, float margin_y) {
 	// Ellenőrzés: egér X pixel benne van a grid területen
 	if (
 		mouseX < gridPositionProjectionX[0] ||
@@ -339,14 +368,14 @@ void plotc_draw_probe_dot(float* x, float* y, int n, int mouseX, int width, boun
 	}
 
 	// 1. Egér X → adatvilág X érték
-	float xval = plotc_unscale(mouseX, b.xmin, b.xmax, margin, width);
+	float xval = plotc_unscale(mouseX, b.xmin, b.xmax, margin_x, width);
 
 	// 2. Adatvilág X → Y érték interpolációval
 	float yval = get_y_from_x(x, y, n, xval);
 
 	// 3. Skálázás OpenGL világba
-	float xp = plotc_scale(xval, b.xmin, b.xmax, margin);
-	float yp = plotc_scale(yval, b.ymin, b.ymax, margin);
+	float xp = plotc_scale(xval, b.xmin, b.xmax, margin_x);
+	float yp = plotc_scale(yval, b.ymin, b.ymax, margin_y);
 
 	// 4. Rajz: OpenGL világban, nem pixelben
 	glMatrixMode(GL_MODELVIEW);

@@ -271,7 +271,7 @@ void plotc(float* x, float* y, int n, const char* title) {
 
 				// red dot
 				if (mouse_in_range())
-					plotc_draw_probe_dot(x, y, n, mouseX, width, b, margin);
+					plotc_draw_probe_dot(x, y, n, mouseX, width, b, margin_x, margin_y);
 					
 				// rendering
 				renderingNow = 0;	
