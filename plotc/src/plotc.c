@@ -55,6 +55,8 @@
  
 #define MAX_GRID_LINE 16
 
+#define MAX_TOKENS 5
+
 /*!
  * standard includes
  */
@@ -113,7 +115,16 @@ int
 	
 	// grid margin
 	gridPositionProjectionX[16],
-	gridPositionProjectionY[16]; 
+	gridPositionProjectionY[16],
+	
+	// text tokens
+	tokenCount; 
+
+enum Tokens {
+	T_TITLE,
+	T_AXIS_LABEL_X,
+	T_AXIS_LABEL_Y
+};
 
 /*!
  * Aux methods
@@ -134,6 +145,23 @@ void end_pixel_mode() {
     glPopMatrix();	
 }
 
+
+char** split_by_semicolon(const char* input, int* out_count) {
+    char* copy = strdup(input);
+    char** tokens = malloc(MAX_TOKENS * sizeof(char*));
+    int count = 0;
+
+    char* token = strtok(copy, ";");
+    while (token != NULL && count < MAX_TOKENS) {
+        tokens[count++] = strdup(token); 
+        token = strtok(NULL, ";");
+    }
+
+    *out_count = count;
+    free(copy);
+    return tokens;
+}
+
 /* DEV */
 
 float get_y_from_x(float* x, float* y, int n, float xval) {
@@ -150,7 +178,7 @@ float get_y_from_x(float* x, float* y, int n, float xval) {
  * Main function of plotC
  */
  
-
+// data X of sample, data Y of sample, size of sample, title text
 void plotc(float* x, float* y, int n, const char* title) {
 	
 	#ifdef _WIN32
@@ -162,10 +190,15 @@ void plotc(float* x, float* y, int n, const char* title) {
 	
 		if (!glfwInit_ptr()) return;
 		
+	// tokenizer
+
+	tokenCount = sizeof(title)/sizeof(char);
+    char** tokenizedText = split_by_semicolon(title, &tokenCount);
+			
 	// make window
 
 		char windowTitle[128] = {0};
-		snprintf(windowTitle, sizeof(windowTitle), "%s - %s (ver. %s)", title, PLOTC_NAME, PLOTC_VER);
+		snprintf(windowTitle, sizeof(windowTitle), "%s - %s (ver. %s)", tokenizedText[T_TITLE], PLOTC_NAME, PLOTC_VER);
 		
 		glfwWindowHint_ptr(GLFW_CONTEXT_VERSION_MAJOR, 2); // v2.0 minimum
 		glfwWindowHint_ptr(GLFW_CONTEXT_VERSION_MINOR, 0);
@@ -180,13 +213,6 @@ void plotc(float* x, float* y, int n, const char* title) {
 			return;
 		}
 				
-		
-		if (!window) {
-			printf ("Baj van...");
-			glfwTerminate_ptr();
-			return;
-		}
-
 		glfwMakeContextCurrent_ptr(window);
 	
 	// events
@@ -251,9 +277,6 @@ void plotc(float* x, float* y, int n, const char* title) {
 				float margin_y = ((float)margin_px / (float)height * marginSpace);
 				margin = margin_x < margin_y ? margin_y : margin_x;
 				
-				printf ("\n>%lf", margin);
-				margin += 0.1;
-				
 				marginX_px = 0;
 				marginY_px = 0;
 				
@@ -285,7 +308,8 @@ void plotc(float* x, float* y, int n, const char* title) {
 				draw_crosshair(mouseX, mouseY/*, width, height*/);
 				
 				// tengelycímkék
-plotc_draw_axis_labels("Ido [s]", "Amplitudo [V]");
+				if (tokenCount > 2)
+					plotc_draw_axis_labels(tokenizedText[T_AXIS_LABEL_X], tokenizedText[T_AXIS_LABEL_Y]);
 							
 				// DEV (inline)
 				

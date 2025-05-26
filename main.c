@@ -42,7 +42,7 @@ int main() {
 	}
 
 	// plotC
-	plotc(x, y, s, "50Hz szinusz");
+	plotc(x, y, s, "50Hz szinusz; Ido [s]; Amplitudo [V]");
 
 	free(x);
 	free(y);
