@@ -59,8 +59,9 @@ void framebuffer_size_callback(GLFWwindow* window_local, int w, int h) {
 	
     glViewport(0, 0, w, h);
 		
-	// re-rendering
+	// re-rendering & resized
 	renderingNow = 1;
+	resizedNow = 1;
 
     glfwGetFramebufferSize_ptr(window, &width, &height);
 	

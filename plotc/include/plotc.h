@@ -10,8 +10,10 @@
 #include "stb_truetype.h"
  
 extern int renderingNow;
+extern int resizedNow;
 
-
+extern float axisXValues[16];
+extern float axisYValues[16];
 extern float gridPositionModelX[16];
 extern float gridPositionModelY[16];
 extern int gridPositionProjectionX[16];
@@ -30,5 +32,7 @@ void plotc(float*, float*, int, const char*);
 
 void begin_pixel_mode(int, int);
 void end_pixel_mode();
+
+void set_axis_values(float*, float*, int);
 
 #endif

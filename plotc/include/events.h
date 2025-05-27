@@ -7,6 +7,7 @@
  
 // rendering bit
 extern int renderingNow;
+extern int resizedNow;
 
 // GLFW window
 extern GLFWwindow* window;

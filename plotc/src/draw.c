@@ -107,49 +107,6 @@ bounds plotc_draw_grid_scale_calc(float* x, float* y, int n) {
 	return b; 
 }
 
-/*
-void plotc_draw_grid(float xmin, float xmax, float ymin, float ymax, float margin) {
-	
-	glColor3f(0.8f, 0.8f, 0.8f);
-	glLineWidth(1.0f);
-
-	glBegin(GL_LINES);
-
-	// X irányban 11 osztás (10 köz)
-	for (int i = 0; i <= 10; i++) {
-		float x = xmin + i * (xmax - xmin) / 10.0f;
-		float xp = plotc_scale(x, xmin, xmax, margin);
-		
-		// save the positions of Axis-X in Modelview
-		gridPositionModelX[i] = xp;
-		
-		// save the sposition of Axis-X in Projection
-		gridPositionProjectionX[i] = (int)((xp + 1.0f) * 0.5f * width);
-		
-		glVertex2f(xp, plotc_scale(ymin, ymin, ymax, margin));
-		glVertex2f(xp, plotc_scale(ymax, ymin, ymax, margin));
-		
-	}
-
-	// Y irányban 11 osztás
-	for (int i = 0; i <= 10; i++) {
-		float y = ymin + i * (ymax - ymin) / 10.0f;
-		float yp = plotc_scale(y, ymin, ymax, margin);
-		
-		// save the positions of Axis-Y in Modelview
-		gridPositionModelY[i] = yp;
-		
-		// save the positions of Axis-Y in Projection
-		gridPositionProjectionY[i] = (int)((1.0f - yp) * 0.5f * height);
-
-		glVertex2f(plotc_scale(xmin, xmin, xmax, margin), yp);
-		glVertex2f(plotc_scale(xmax, xmin, xmax, margin), yp);
-	}
-
-	glEnd();
-} 
-*/
-
 void plotc_draw_grid(float xmin, float xmax, float ymin, float ymax, float margin_x, float margin_y) {
 	
 	glColor3f(0.8f, 0.8f, 0.8f);
@@ -179,7 +136,7 @@ void plotc_draw_grid(float xmin, float xmax, float ymin, float ymax, float margi
 		
 		// save the positions of Axis-Y in Modelview
 		gridPositionModelY[i] = yp;
-		
+				
 		// save the positions of Axis-Y in Projection
 		gridPositionProjectionY[i] = (int)((1.0f - yp) * 0.5f * height);
 
@@ -188,6 +145,7 @@ void plotc_draw_grid(float xmin, float xmax, float ymin, float ymax, float margi
 	}
 
 	glEnd();
+
 }
 
 /*!
@@ -297,6 +255,23 @@ void plotc_draw_axis_labels(const char* xlabel, const char* ylabel) {
     glPopMatrix();
 
     end_pixel_mode();
+}
+
+void plotc_draw_axis_y_values(float paddingY) {
+
+    begin_pixel_mode(width, height);
+    glColor3f(0, 0, 0);  // fekete szöveg
+
+	for (int i = 0; i <= 10; i++) {
+
+		char* temp =( char *)calloc(16, sizeof(char));
+		
+		sprintf (temp, "%.2lf", axisYValues[i]);
+		draw_text(40.0,gridPositionProjectionY[i] + paddingY, temp);
+	}
+	
+	end_pixel_mode();
+	
 }
 
 /*!

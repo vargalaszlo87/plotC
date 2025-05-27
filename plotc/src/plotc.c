@@ -82,6 +82,7 @@
  */
  
 int renderingNow = 1;
+int resizedNow = 1;
 
 GLFWwindow* window;
 
@@ -89,11 +90,17 @@ int width;
 int height;
 
 float
+	// axis values
+	axisYValues[16],
+	axisXValues[16],
+
 	// calculated margin in pixel
 	margin,
+	margin_x,
+	margin_y,
 	
 	// margin-Y space 
-	marginSpace = 1.2,
+	marginYSpace = 1.2,
 
 	// grid 
 	gridPositionModelX[16],
@@ -172,6 +179,35 @@ float get_y_from_x(float* x, float* y, int n, float xval) {
         }
     }
     return 0.0f;  // ha kívül van, vissza 0 vagy hibajelzés
+}
+
+float max_float(float *a, int n) {
+    float temp = a[0];
+    int i = 0;
+    while (++i < n)
+		temp = (a[i] > temp) ? a[i] : temp;	
+    return temp;
+}
+
+float min_float(float *a, int n) {
+	float temp = a[0];
+    int i = 0;
+    while (++i < n)
+		temp = (a[i] < temp) ? a[i] : temp;	
+    return temp;
+}
+
+void set_axis_values(float* x, float *y, int n) {
+
+	// get min, max value
+	float maxValue = max_float(y, n);
+	float minValue = min_float(y, n);
+	float step = (maxValue - minValue) / 10;
+
+	// fill the axis Y value matrix
+	for (int i = 0; i <= 10 ; i++) {
+		axisYValues[i] = minValue + (step * i);
+	}
 }
 
 /*!
@@ -255,6 +291,10 @@ void plotc(float* x, float* y, int n, const char* title) {
 	
 		init_font_texture("plotc/font/arial.ttf"); // vagy bármilyen .ttf fájl
 		
+	// calc
+	
+		set_axis_values(x, y, n);
+		
 	// window
 		while (!glfwWindowShouldClose_ptr(window)) {	
 			
@@ -270,17 +310,26 @@ void plotc(float* x, float* y, int n, const char* title) {
 				glClear(GL_COLOR_BUFFER_BIT);
 
 				// margin			
-				//float margin = 0.1f;
 				
-				margin_px = 50;
-				float margin_x = (float)margin_px / (float)width;
-				float margin_y = ((float)margin_px / (float)height * marginSpace);
-				margin = margin_x < margin_y ? margin_y : margin_x;
-				
-				marginX_px = 0;
-				marginY_px = 0;
-				
-		
+				if (resizedNow) {
+					
+					// set margin in px
+					margin_px = 50;
+					
+					// calc margin in float
+					margin_x = (float)margin_px / (float)width;
+					margin_x *= 2.0;
+					margin_y = ((float)margin_px / (float)height * marginYSpace);
+					margin = margin_x < margin_y ? margin_y : margin_x;
+					
+					// reset margin x and y in px
+					//marginX_px = 0;
+					//marginY_px = 0;
+
+					// calc is ready
+					resizedNow = 0;							
+				}
+
 		// IN WORLD
 		
 				// grid
@@ -288,9 +337,9 @@ void plotc(float* x, float* y, int n, const char* title) {
 										
 				// data
 				plotc_draw_data(x, y, n, b, margin_x, margin_y); 
-				
+
 				// status bar
-				plotc_draw_statusbar(margin_y / marginSpace);
+				plotc_draw_statusbar(margin_y / marginYSpace);
 
 				// red dot
 				if (mouse_in_range())
@@ -307,9 +356,11 @@ void plotc(float* x, float* y, int n, const char* title) {
 				// draw crosshair
 				draw_crosshair(mouseX, mouseY/*, width, height*/);
 				
-				// tengelycímkék
+				// axis labels and values
 				if (tokenCount > 2)
 					plotc_draw_axis_labels(tokenizedText[T_AXIS_LABEL_X], tokenizedText[T_AXIS_LABEL_Y]);
+				
+				plotc_draw_axis_y_values(5.0);
 							
 				// DEV (inline)
 				
@@ -318,7 +369,7 @@ void plotc(float* x, float* y, int n, const char* title) {
 					}
 					else {
 
-						float xval = plotc_unscale(mouseX, b.xmin, b.xmax, margin, width);
+						float xval = plotc_unscale(mouseX, b.xmin, b.xmax, margin_x, width);
 						float yval = get_y_from_x(x, y, 1000, xval);
 
 						// statusbar text
