@@ -80,6 +80,8 @@
  * Variables
  */
  
+int firstStart = 0;
+ 
 int renderingNow = 1;
 int resizedNow = 1;
 
@@ -276,14 +278,15 @@ void plotc(float* x, float* y, int n, const char* title) {
 
 				// margin			
 				
-				if (resizedNow) {
+				//if (resizedNow) {
 					
 					// set margin in px
 					margin_px = 50;
 					
 					// calc margin in float
-					margin_x = (float)margin_px / (float)width;
-					margin_x *= 2.0;
+					margin_x = (float)margin_px  / (float)width;
+					margin_x *= 1.0;
+					margin_x += (float)maxAxisYValueSizeInPx / (float)width;
 					margin_y = ((float)margin_px / (float)height * marginYSpace);
 					margin = margin_x < margin_y ? margin_y : margin_x;
 					
@@ -293,7 +296,7 @@ void plotc(float* x, float* y, int n, const char* title) {
 
 					// calc is ready
 					resizedNow = 0;							
-				}
+				//}
 
 		// IN WORLD
 		
@@ -355,6 +358,14 @@ void plotc(float* x, float* y, int n, const char* title) {
 
 				// swap buffer
 				glfwSwapBuffers_ptr(window);
+				
+				// first start events
+				if (!firstStart) {
+					framebuffer_size_callback(window, width, height);
+					
+					firstStart = 1;
+				}
+					
 				
 			}
 			

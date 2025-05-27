@@ -23,7 +23,7 @@ int main() {
 
 	// signal
 	float
-		f = 50,			// frequency in Hz
+		f = 55,			// frequency in Hz
 		A = 1.2;		// amplitude
 	
 	float * x = (float*)calloc(s + 1, sizeof(float));

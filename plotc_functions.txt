@@ -1,8 +1,8 @@
-begin_pixel_mode function    142 plotc/src/plotc.c void begin_pixel_mode(int width, int height) {
+begin_pixel_mode function    144 plotc/src/plotc.c void begin_pixel_mode(int width, int height) {
 cursor_position_callback function     41 plotc/src/events.c void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
 draw_crosshair   function    267 plotc/src/draw.c void draw_crosshair(int mouseX, int mouseY) {
 draw_text        function    184 plotc/src/draw.c int draw_text(float x, float y, const char* text) {
-end_pixel_mode   function    152 plotc/src/plotc.c void end_pixel_mode() {
+end_pixel_mode   function    154 plotc/src/plotc.c void end_pixel_mode() {
 framebuffer_size_callback function     56 plotc/src/events.c void framebuffer_size_callback(GLFWwindow* window_local, int w, int h) {
 get_y_from_x     function     71 plotc/src/calc.c float get_y_from_x(float* x, float* y, int n, float xval) {
 init_font_texture function    155 plotc/src/draw.c void init_font_texture(const char* font_path) {
@@ -13,7 +13,7 @@ min_float        function     63 plotc/src/calc.c float min_float(float *a, int 
 min_int          function     47 plotc/src/calc.c int min_int(int *a, int n) {
 mouse_in_range   function     75 plotc/src/draw.c bool mouse_in_range() {
 plot_text_statusbar function     51 plotc/src/statusbar.c void plot_text_statusbar(char *text) {
-plotc            function    183 plotc/src/plotc.c void plotc(float* x, float* y, int n, const char* title) {
+plotc            function    185 plotc/src/plotc.c void plotc(float* x, float* y, int n, const char* title) {
 plotc_draw_axis_labels function    216 plotc/src/draw.c void plotc_draw_axis_labels(const char* xlabel, const char* ylabel) {
 plotc_draw_axis_y_values function    243 plotc/src/draw.c void plotc_draw_axis_y_values(float paddingY) {
 plotc_draw_data  function    301 plotc/src/draw.c void plotc_draw_data(float* x, float* y, int n, bounds b, float margin_x, float margin_y) {
@@ -24,4 +24,4 @@ plotc_draw_statusbar function     41 plotc/src/statusbar.c void plotc_draw_statu
 plotc_scale      function     57 plotc/src/draw.c float plotc_scale(float v, float vmin, float vmax, float margin) {
 plotc_unscale    function     68 plotc/src/draw.c float plotc_unscale(int pixel, float vmin, float vmax, float margin, int width) {
 set_axis_values  function     82 plotc/src/calc.c void set_axis_values(float* x, float *y, int n) {
-split_by_semicolon function    158 plotc/src/plotc.c char** split_by_semicolon(const char* input, int* out_count) {
+split_by_semicolon function    160 plotc/src/plotc.c char** split_by_semicolon(const char* input, int* out_count) {
