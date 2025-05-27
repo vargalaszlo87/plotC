@@ -1,0 +1,32 @@
+Folder PATH listing
+Volume serial number is 00000046 7E23:E8E7
+C:\USERS\VARGALASZLO87\DOCUMENTS\GITHUB\PLOTC\PLOTC
++---font
+|       arial.ttf
+|       
++---include
+|       calc.h
+|       config.h
+|       draw.h
+|       dyndll.h
+|       events.h
+|       glfw3.h
+|       plotc.h
+|       statusbar.h
+|       stb_truetype.h
+|       
++---lib
+|   \---windows
+|           glfw3.dll
+|           libglfw3dll.a
+|           opengl32.dll
+|           
+\---src
+        calc.c
+        draw.c
+        dyndll.c
+        events.c
+        general.c
+        plotc.c
+        statusbar.c
+        

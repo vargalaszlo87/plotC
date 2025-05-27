@@ -18,5 +18,6 @@ if %ERRORLEVEL% NEQ 0 (
 	%FNAME%.exe
 )
 
-ctags -x --c-kinds=f %DIR%/src/*.c > functions.txt 
+ctags -x --c-kinds=f %DIR%/src/*.c > plotc_functions.txt 
+tree plotc /F /A > pltoc_structure.txt
 
