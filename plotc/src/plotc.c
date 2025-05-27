@@ -50,12 +50,10 @@
 #define PLOTC_VER "0.1" 
 
 /*!
- *	defined max values
+ *	defined values
  */
- 
-#define MAX_GRID_LINE 16
 
-#define MAX_TOKENS 5
+
 
 /*!
  * standard includes
@@ -70,12 +68,13 @@
  * project includes
  */
  
-#include "debug.h"
+#include "config.h"
 #include "plotc.h"
 #include "dyndll.h"
 #include "events.h"
 #include "statusbar.h"
 #include "draw.h"
+#include "calc.h"
 
 /*!
  * Variables
@@ -91,8 +90,8 @@ int height;
 
 float
 	// axis values
-	axisYValues[16],
-	axisXValues[16],
+	axisYValues[MAX_GRID_LINE],
+	axisXValues[MAX_GRID_LINE],
 
 	// calculated margin in pixel
 	margin,
@@ -103,26 +102,29 @@ float
 	marginYSpace = 1.2,
 
 	// grid 
-	gridPositionModelX[16],
-	gridPositionModelY[16];
+	gridPositionModelX[MAX_GRID_LINE],
+	gridPositionModelY[MAX_GRID_LINE];
 
 int
 	// margin in pixel
 	margin_px,
-	marginX_px,
-	marginY_px,
+//	marginX_px,
+//	marginY_px,
 	
 	// mouse
 	mouseX,
 	mouseY,
+	
+	// y asis value
+	maxAxisYValueSizeInPx,
 
 	// mouse inside grid
 	mouseXinGrid,
 	mouseYinGrid,
 	
 	// grid margin
-	gridPositionProjectionX[16],
-	gridPositionProjectionY[16],
+	gridPositionProjectionX[MAX_GRID_LINE],
+	gridPositionProjectionY[MAX_GRID_LINE],
 	
 	// text tokens
 	tokenCount; 
@@ -171,44 +173,7 @@ char** split_by_semicolon(const char* input, int* out_count) {
 
 /* DEV */
 
-float get_y_from_x(float* x, float* y, int n, float xval) {
-    for (int i = 0; i < n - 1; i++) {
-        if (xval >= x[i] && xval <= x[i + 1]) {
-            float t = (xval - x[i]) / (x[i + 1] - x[i]);
-            return y[i] + t * (y[i + 1] - y[i]);  // lineáris interpoláció
-        }
-    }
-    return 0.0f;  // ha kívül van, vissza 0 vagy hibajelzés
-}
 
-float max_float(float *a, int n) {
-    float temp = a[0];
-    int i = 0;
-    while (++i < n)
-		temp = (a[i] > temp) ? a[i] : temp;	
-    return temp;
-}
-
-float min_float(float *a, int n) {
-	float temp = a[0];
-    int i = 0;
-    while (++i < n)
-		temp = (a[i] < temp) ? a[i] : temp;	
-    return temp;
-}
-
-void set_axis_values(float* x, float *y, int n) {
-
-	// get min, max value
-	float maxValue = max_float(y, n);
-	float minValue = min_float(y, n);
-	float step = (maxValue - minValue) / 10;
-
-	// fill the axis Y value matrix
-	for (int i = 0; i <= 10 ; i++) {
-		axisYValues[i] = minValue + (step * i);
-	}
-}
 
 /*!
  * Main function of plotC

@@ -7,7 +7,7 @@
 #ifndef DYNDLL_H
 #define DYNDLL_H
 
-#include "debug.h"
+#include "config.h"
 
 #ifdef _WIN32
 

@@ -33,7 +33,7 @@
  *
  */
 
-#include "debug.h"
+#include "config.h"
 #include "glfw3.h"  
 #include "dyndll.h"
 #include "events.h"

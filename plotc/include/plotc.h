@@ -18,6 +18,7 @@ extern float gridPositionModelX[16];
 extern float gridPositionModelY[16];
 extern int gridPositionProjectionX[16];
 extern int gridPositionProjectionY[16];
+extern int maxAxisYValueSizeInPx;
 extern int width, height;
 extern float margin;
 extern int margin_px, marginX_px, marginY_px;

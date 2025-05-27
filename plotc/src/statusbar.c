@@ -34,7 +34,7 @@
  *
  */
 
-#include "debug.h"
+#include "config.h"
 #include "glfw3.h"  
 #include "statusbar.h"
 

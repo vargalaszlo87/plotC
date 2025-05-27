@@ -1,0 +1,4 @@
+# --- Ctags és Cscope ---
+tags
+cscope.*
+ctags.exe

@@ -14,7 +14,7 @@ extern int height;
 
 extern void begin_pixel_mode(int, int);
 extern void end_pixel_mode();
-extern void draw_text(float, float, const char*);
+extern int draw_text(float, float, const char*);
 
 void plotc_draw_statusbar(float);
 void plot_text_statusbar(char *);

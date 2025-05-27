@@ -34,7 +34,7 @@
  *
  */
 
-#include "debug.h"
+#include "config.h"
 #include "glfw3.h"
 #include "draw.h"
 
@@ -75,8 +75,8 @@ float plotc_unscale(int pixel, float vmin, float vmax, float margin, int width) 
 bool mouse_in_range() {
 	if (
 		mouseX <= gridPositionProjectionX[0] ||
-		mouseX >= gridPositionProjectionX[10] ||
-		mouseY <= gridPositionProjectionY[10] ||
+		mouseX >= gridPositionProjectionX[GRID_LINE - 1] ||
+		mouseY <= gridPositionProjectionY[GRID_LINE - 1] ||
 		mouseY >= gridPositionProjectionY[0]
 	)
 		return false;
@@ -181,7 +181,9 @@ void init_font_texture(const char* font_path) {
 }
 
  
-void draw_text(float x, float y, const char* text) {
+int draw_text(float x, float y, const char* text) {
+	
+	float start_x = x;
 	
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -205,30 +207,11 @@ void draw_text(float x, float y, const char* text) {
     glEnd();
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_BLEND);
+	
+	//printf ("%d aaa \t",(int)(x - start_x));
+	return (int)(x - start_x);
+	return 1;
 }
-
-/*
-void plotc_draw_axis_labels(const char* xlabel, const char* ylabel) {
-    begin_pixel_mode(width, height);
-    glColor3f(0, 0, 0);  // fekete szöveg
-
-    // --- X tengelycímke: középre lentre ---
-    int x_pos = width / 2 - strlen(xlabel) * 4;  // kb. középre igazítás
-    int y_pos = height - 40;
-    draw_text((float)x_pos, (float)y_pos, xlabel);
-
-    // --- Y tengelycímke: balra, középre függőlegesen (karakterenként írjuk le) ---
-    int x_y_label = 10;
-    int y_y_label = height / 2 - (strlen(ylabel) * 8 / 2);
-
-    for (int i = 0; ylabel[i] != '\0'; i++) {
-        char s[2] = { ylabel[i], 0 };
-        draw_text((float)x_y_label, (float)(y_y_label + i * 12), s);
-    }
-
-    end_pixel_mode();
-}
-*/
 
 void plotc_draw_axis_labels(const char* xlabel, const char* ylabel) {
     begin_pixel_mode(width, height);
@@ -260,16 +243,19 @@ void plotc_draw_axis_labels(const char* xlabel, const char* ylabel) {
 void plotc_draw_axis_y_values(float paddingY) {
 
     begin_pixel_mode(width, height);
-    glColor3f(0, 0, 0);  // fekete szöveg
+    glColor3f(0, 0, 0); 
 
+	int sizeOfTextInPixel[11] = {0};
 	for (int i = 0; i <= 10; i++) {
 
+		// float to char[]
 		char* temp =( char *)calloc(16, sizeof(char));
-		
 		sprintf (temp, "%.2lf", axisYValues[i]);
-		draw_text(40.0,gridPositionProjectionY[i] + paddingY, temp);
+		
+		sizeOfTextInPixel[i] = draw_text(40.0,gridPositionProjectionY[i] + paddingY, temp);
 	}
 	
+	maxAxisYValueSizeInPx = max_int(sizeOfTextInPixel, 11);	
 	end_pixel_mode();
 	
 }
@@ -282,8 +268,8 @@ void draw_crosshair(int mouseX, int mouseY) {
 			
 	if (
 		mouseX <= gridPositionProjectionX[0] ||
-		mouseX >= gridPositionProjectionX[10] ||
-		mouseY <= gridPositionProjectionY[10] ||
+		mouseX >= gridPositionProjectionX[GRID_LINE - 1] ||
+		mouseY <= gridPositionProjectionY[GRID_LINE - 1] ||
 		mouseY >= gridPositionProjectionY[0]
 	)
 		return;

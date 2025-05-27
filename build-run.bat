@@ -9,7 +9,7 @@ if "%~1"=="" (
 
 for %%f in (%1) do set FNAME=%%~nf
 
-gcc %1 %DIR%/src/plotc.c %DIR%/src/events.c %DIR%/src/dyndll.c  %DIR%/src/statusbar.c %DIR%/src/draw.c -I%DIR%/include -L%DIR%/lib/windows -o %FNAME%.exe -lopengl32 -lgdi32 -std=c99
+gcc %1 %DIR%/src/plotc.c %DIR%/src/events.c %DIR%/src/dyndll.c  %DIR%/src/statusbar.c %DIR%/src/draw.c %DIR%/src/calc.c -I%DIR%/include -L%DIR%/lib/windows -o %FNAME%.exe -lopengl32 -lgdi32 -std=c99
 
 if %ERRORLEVEL% NEQ 0 (
     echo Build failed!
@@ -17,4 +17,6 @@ if %ERRORLEVEL% NEQ 0 (
     echo Build succeeded: %FNAME%.exe
 	%FNAME%.exe
 )
+
+ctags -x --c-kinds=f %DIR%/src/*.c > functions.txt 
 
