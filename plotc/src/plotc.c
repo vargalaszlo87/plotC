@@ -94,6 +94,10 @@ float
 	// axis values
 	axisYValues[MAX_GRID_LINE],
 	axisXValues[MAX_GRID_LINE],
+	
+	// div
+	divX,
+	divY,
 
 	// calculated margin in pixel
 	margin,
@@ -260,7 +264,12 @@ void plotc(float* x, float* y, int n, const char* title) {
 		
 	// calc
 	
+		// axis values
 		set_axis_values(x, y, n);
+		
+		// divs
+		divX = (max_float(x, n) - min_float(x, n)) / (GRID_LINE - 1);
+		divY = (max_float(y, n) - min_float(y, n)) / (GRID_LINE - 1);
 		
 	// window
 		while (!glfwWindowShouldClose_ptr(window)) {	
@@ -289,10 +298,6 @@ void plotc(float* x, float* y, int n, const char* title) {
 					margin_x += (float)maxAxisYValueSizeInPx / (float)width;
 					margin_y = ((float)margin_px / (float)height * marginYSpace);
 					margin = margin_x < margin_y ? margin_y : margin_x;
-					
-					// reset margin x and y in px
-					//marginX_px = 0;
-					//marginY_px = 0;
 
 					// calc is ready
 					resizedNow = 0;							
@@ -348,7 +353,9 @@ void plotc(float* x, float* y, int n, const char* title) {
 							sprintf (mouseYinGridStr, "%d", mouseYinGrid);
 							
 							char *statusbarText = (char*)calloc(128, sizeof(char));
-							sprintf(statusbarText, "Mouse position: %s x %s  \t  Y[x] value = %lf",mouseXinGridStr, mouseYinGridStr, yval);
+							// dev: Mouse position: %s x %s  \t  
+							
+							sprintf(statusbarText, "X: %s/div  |  Y: %s/div  |  Y[x] value = %.4lf \t ", format_number_static(divX), format_number_static(divY), yval);
 
 							plot_text_statusbar(statusbarText);
 

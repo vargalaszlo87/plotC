@@ -1,6 +1,6 @@
-Folder PATH listing
-Volume serial number is 00000036 7E23:E8E7
-C:\USERS\VARGALASZLO87\DOCUMENTS\GITHUB\PLOTC\PLOTC
+Folder PATH listing for volume System
+Volume serial number is 000000D7 B4AB:3B0B
+C:\USERS\GF4HIG3\ONEDRIVE\EIGENE DATEIEN\GITHUB\PLOTC\PLOTC
 +---font
 |       arial.ttf
 |       
@@ -16,6 +16,7 @@ C:\USERS\VARGALASZLO87\DOCUMENTS\GITHUB\PLOTC\PLOTC
 |       stb_truetype.h
 |       
 +---lib
+|   +---linux
 |   \---windows
 |           glfw3.dll
 |           libglfw3dll.a

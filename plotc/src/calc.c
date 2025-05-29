@@ -33,6 +33,9 @@
  *
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 #include "calc.h"
 #include "config.h"
 
@@ -66,6 +69,16 @@ float min_float(float *a, int n) {
     while (++i < n)
 		temp = (a[i] < temp) ? a[i] : temp;	
     return temp;
+}
+
+char* format_number_static(double value) {
+    char * out = (char*)calloc(32, sizeof(char));
+    double abs_val = fabs(value);
+    if ((abs_val >= 1000.0) || (abs_val > 0 && abs_val <= 0.01))
+        sprintf(out, "%.3e", value);
+    else
+        sprintf(out, "%.3f", value);
+    return out;
 }
 
 float get_y_from_x(float* x, float* y, int n, float xval) {

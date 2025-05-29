@@ -17,14 +17,14 @@ int main() {
 	// time
 	float 
 		t0 = 0,			// start of time in sec
-		t1 = 0.1,		// end of time in sec
+		t1 = 0.13,		// end of time in sec
 		s = 1000,		// stepsize
 		dt = (t1 - t0) / s;	// sampling time
 
 	// signal
 	float
 		f = 55,			// frequency in Hz
-		A = 1.2;		// amplitude
+		A = 3.2;		// amplitude
 	
 	float * x = (float*)calloc(s + 1, sizeof(float));
 	float * y = (float*)calloc(s + 1, sizeof(float));
