@@ -243,7 +243,6 @@ void plotc(float* x, float* y, int n, const char* title) {
 				printf("> address of glfwSetFramebufferSizeCallback : %p\n", glfwSetCursorPosCallback_ptr);			
 			#endif
 		}
-		
 			
 	// base viewport
 	
@@ -271,6 +270,12 @@ void plotc(float* x, float* y, int n, const char* title) {
 		divX = (max_float(x, n) - min_float(x, n)) / (GRID_LINE - 1);
 		divY = (max_float(y, n) - min_float(y, n)) / (GRID_LINE - 1);
 		
+	// statusbar
+	
+		char *statusbarText = (char*)calloc(128, sizeof(char));
+		char *statusbarSetInRange = "X: %s/div  |  Y: %s/div  |  Y[%s] = %s";
+		char *statusbarSetNotInRange = "X: %s/div  |  Y: %s/div  |  Y[N/A] = N/A";
+
 	// window
 		while (!glfwWindowShouldClose_ptr(window)) {	
 			
@@ -337,26 +342,26 @@ void plotc(float* x, float* y, int n, const char* title) {
 							
 				// DEV (inline)
 				
+					float xval = plotc_unscale(mouseX, b.xmin, b.xmax, margin_x, width);
+					float yval = get_y_from_x(x, y, 1000, xval);
+				
 					if (!mouse_in_range()) {
-						plot_text_statusbar("Mouse position: Out of range.");
+							sprintf(statusbarText, statusbarSetNotInRange, format_number_static(divX), format_number_static(divY));
+							plot_text_statusbar(statusbarText);
 					}
 					else {
-
-						float xval = plotc_unscale(mouseX, b.xmin, b.xmax, margin_x, width);
-						float yval = get_y_from_x(x, y, 1000, xval);
-
-						// statusbar text
+						
+						// mouse grid, aux for future
+						
 							char* mouseXinGridStr = (char*)calloc(8, sizeof(char));
 							char* mouseYinGridStr = (char*)calloc(8, sizeof(char));
-						
+					
 							sprintf (mouseXinGridStr, "%d", mouseXinGrid);
-							sprintf (mouseYinGridStr, "%d", mouseYinGrid);
-							
-							char *statusbarText = (char*)calloc(128, sizeof(char));
-							// dev: Mouse position: %s x %s  \t  
-							
-							sprintf(statusbarText, "X: %s/div  |  Y: %s/div  |  Y[x] value = %.4lf \t ", format_number_static(divX), format_number_static(divY), yval);
+							sprintf (mouseYinGridStr, "%d", mouseYinGrid);							
 
+						// statusbar text
+						
+							sprintf(statusbarText, statusbarSetInRange, format_number_static(divX), format_number_static(divY), format_number_static(xval), format_number_static(yval));
 							plot_text_statusbar(statusbarText);
 
 					}
