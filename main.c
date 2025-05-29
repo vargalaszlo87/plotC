@@ -18,7 +18,7 @@ int main() {
 	float 
 		t0 = 0,			// start of time in sec
 		t1 = 0.13,		// end of time in sec
-		s = 1000,		// stepsize
+		s = 2000,		// stepsize
 		dt = (t1 - t0) / s;	// sampling time
 
 	// signal
@@ -38,7 +38,7 @@ int main() {
 	int i = -1;
 	while (++i <= s) {
 		*(x + i) = i * dt;
-		*(y + i) = A * sin(2 * M_PI * f * *(x + i)) * A * 0.7 * cos(2 * M_PI * f * 12 * *(x + i));
+		*(y + i) = A * sin(2 * M_PI * f * *(x + i)) * A * 0.7 * cos(2 * M_PI * f * 8 * *(x + i));
 	}
 
 	// plotC

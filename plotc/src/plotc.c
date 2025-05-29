@@ -353,7 +353,7 @@ void plotc(float* x, float* y, int n, const char* title) {
 				// DEV (inline)
 				
 					float xval = plotc_unscale(mouseX, b.xmin, b.xmax, margin_x, width);
-					float yval = get_y_from_x(x, y, 1000, xval);
+					float yval = get_y_from_x(x, y, n, xval);
 				
 					if (!mouse_in_range()) {
 							sprintf(statusbarText, statusbarSetNotInRange, format_number_static(divX), format_number_static(divY));
