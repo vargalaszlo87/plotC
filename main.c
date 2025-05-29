@@ -23,7 +23,7 @@ int main() {
 
 	// signal
 	float
-		f = 55,			// frequency in Hz
+		f = 30,			// frequency in Hz
 		A = 3.2;		// amplitude
 	
 	float * x = (float*)calloc(s + 1, sizeof(float));
@@ -38,7 +38,7 @@ int main() {
 	int i = -1;
 	while (++i <= s) {
 		*(x + i) = i * dt;
-		*(y + i) = A * sin(2 * M_PI * f * *(x + i));
+		*(y + i) = A * sin(2 * M_PI * f * *(x + i)) * A * 0.7 * cos(2 * M_PI * f * 12 * *(x + i));
 	}
 
 	// plotC

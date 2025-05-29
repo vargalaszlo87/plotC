@@ -8,6 +8,8 @@
  *
  * Features:
  * - resizable callback
+ * - cursor position callback
+ * - scroll callback
  *
  * @author Varga Laszlo
  *
@@ -90,7 +92,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
     renderingNow = 1;
 	
 	#ifdef DEBUG
-		printf ("> scrolled\n");
+		printf ("> nouse is scrolled.\n");
 	#endif
 	
 }
