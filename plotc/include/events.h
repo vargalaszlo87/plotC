@@ -1,30 +1,47 @@
 #ifndef EVENTS_H
 #define EVENTS_H
 
+#include "config.h"
+
 /*!
  * variables
  */
  
-// rendering bit
-extern int renderingNow;
-extern int resizedNow;
+extern
+	int
+		// rendering bit
+		renderingNow,
+		resizedNow,
+
+		// mouse position
+		mouseX,
+		mouseY,
+		mouseXinGrid,
+		mouseYinGrid,
+		
+		// window size
+		width,
+		height,
+		
+		// grid
+		gridPositionProjectionX[MAX_GRID_LINE],
+		gridPositionProjectionY[MAX_GRID_LINE];
+
+extern 
+	float
+		// margins	
+		margin,
+		margin_x,
+		margin_y;
+
 
 // GLFW window
 extern GLFWwindow* window;
 
-// mouse position
-extern int mouseX;
-extern int mouseY;
-extern int mouseXinGrid;
-extern int mouseYinGrid;
+// viewbound
+extern bounds viewBounds; 
 
-// window size
-extern int width;
-extern int height;
-
-// grid
-extern int gridPositionProjectionX[16];
-extern int gridPositionProjectionY[16];
+// margins
 
 /*!
  * methods
@@ -32,5 +49,8 @@ extern int gridPositionProjectionY[16];
 
 void framebuffer_size_callback(GLFWwindow*, int, int);
 void cursor_position_callback(GLFWwindow*, double, double);
+void scroll_callback(GLFWwindow* window, double, double);
+
+extern float plotc_unscale(int, float, float, float, int);
 
 #endif

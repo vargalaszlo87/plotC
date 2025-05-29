@@ -50,12 +50,6 @@
 #define PLOTC_VER "0.1" 
 
 /*!
- *	defined values
- */
-
-
-
-/*!
  * standard includes
  */
  
@@ -69,6 +63,7 @@
  */
  
 #include "config.h"
+#include "type.h"
 #include "plotc.h"
 #include "dyndll.h"
 #include "events.h"
@@ -114,8 +109,6 @@ float
 int
 	// margin in pixel
 	margin_px,
-//	marginX_px,
-//	marginY_px,
 	
 	// mouse
 	mouseX,
@@ -140,6 +133,8 @@ enum Tokens {
 	T_AXIS_LABEL_X,
 	T_AXIS_LABEL_Y
 };
+
+bounds viewBounds;
 
 /*!
  * Aux methods
@@ -243,6 +238,17 @@ void plotc(float* x, float* y, int n, const char* title) {
 				printf("> address of glfwSetFramebufferSizeCallback : %p\n", glfwSetCursorPosCallback_ptr);			
 			#endif
 		}
+		
+		if (!glfwSetScrollCallback_ptr) {
+			// error
+		}
+		else {
+			glfwSetScrollCallback_ptr(window, scroll_callback);
+			#ifdef DEBUG
+				printf("> address of glfwSetScrollCallback : %p\n", glfwSetScrollCallback_ptr);
+			#endif
+		}
+			
 			
 	// base viewport
 	
@@ -257,6 +263,10 @@ void plotc(float* x, float* y, int n, const char* title) {
 	
 		bounds b = plotc_draw_grid_scale_calc(x, y, n);
 		
+	// view
+		
+		viewBounds = b;
+
 	// fonts
 	
 		init_font_texture("plotc/font/arial.ttf"); // vagy bármilyen .ttf fájl

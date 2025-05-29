@@ -21,6 +21,7 @@ typedef void (*PFN_glfwTerminate)(void);
 typedef GLFWwindow* (*PFN_glfwCreateWindow)(int, int, const char*, void*, void*);
 typedef void (*GLFWframebuffersizefun)(GLFWwindow*, int, int);
 typedef void (*GLFWcursorposfun)(GLFWwindow*, double, double);
+typedef void (*GLFWscrollfun)(GLFWwindow*, double, double);
 typedef void (*PFN_glfwMakeContextCurrent)(GLFWwindow*);
 typedef int (*PFN_glfwWindowShouldClose)(GLFWwindow*);
 typedef void (*PFN_glfwSwapBuffers)(GLFWwindow*);
@@ -29,6 +30,7 @@ typedef void (*PFN_glfwDestroyWindow)(GLFWwindow*);
 typedef void (*PFN_glfwSetFramebufferSizeCallback)(GLFWwindow*, GLFWframebuffersizefun);
 typedef void (*PFN_glfwGetFramebufferSize)(GLFWwindow*, int*, int*);
 typedef void (*PFN_glfwSetCursorPosCallback)(GLFWwindow*, GLFWcursorposfun);
+typedef void (*PFN_glfwSetScrollCallback)(GLFWwindow *, GLFWscrollfun);
 typedef void (*PFN_glfwWindowHint)(int, int); 	
 typedef const char* (*PFN_glfwGetError)(int*);
 
@@ -44,6 +46,7 @@ extern PFN_glfwDestroyWindow glfwDestroyWindow_ptr;
 extern PFN_glfwSetFramebufferSizeCallback glfwSetFramebufferSizeCallback_ptr;
 extern PFN_glfwGetFramebufferSize glfwGetFramebufferSize_ptr;
 extern PFN_glfwSetCursorPosCallback glfwSetCursorPosCallback_ptr;
+extern PFN_glfwSetScrollCallback glfwSetScrollCallback_ptr;
 extern PFN_glfwWindowHint glfwWindowHint_ptr;
 extern PFN_glfwGetError glfwGetError_ptr;
 

@@ -34,6 +34,7 @@
  */
 
 #include "config.h"
+#include "type.h"
 #include "glfw3.h"  
 #include "dyndll.h"
 #include "events.h"
@@ -68,4 +69,28 @@ void framebuffer_size_callback(GLFWwindow* window_local, int w, int h) {
 	#ifdef DEBUG
 		printf ("> framebuffer is resized.\n");
 	#endif
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+    float zoomStep = 0.1f;
+    float factor = (yoffset > 0) ? (1.0f - zoomStep) : (1.0f + zoomStep);
+
+    float x_at_mouse = plotc_unscale(mouseX, viewBounds.xmin, viewBounds.xmax, margin_x, width);
+    float y_at_mouse = plotc_unscale(mouseY, viewBounds.ymin, viewBounds.ymax, margin_y, height);
+
+    float new_xrange = (viewBounds.xmax - viewBounds.xmin) * factor;
+    float new_yrange = (viewBounds.ymax - viewBounds.ymin) * factor;
+
+    viewBounds.xmin = x_at_mouse - (x_at_mouse - viewBounds.xmin) * factor;
+    viewBounds.xmax = viewBounds.xmin + new_xrange;
+
+    viewBounds.ymin = y_at_mouse - (y_at_mouse - viewBounds.ymin) * factor;
+    viewBounds.ymax = viewBounds.ymin + new_yrange;
+
+    renderingNow = 1;
+	
+	#ifdef DEBUG
+		printf ("> scrolled\n");
+	#endif
+	
 }

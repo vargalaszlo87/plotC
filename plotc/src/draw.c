@@ -35,6 +35,7 @@
  */
 
 #include "config.h"
+#include "type.h"
 #include "glfw3.h"
 #include "draw.h"
 

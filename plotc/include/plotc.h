@@ -8,26 +8,56 @@
 #include <GL/gl.h>
 #include "glfw3.h"
 #include "stb_truetype.h"
+#include "config.h"
+#include "type.h"
  
-extern int renderingNow;
-extern int resizedNow;
+extern
+	int
+		renderingNow,
+		resizedNow,
+		
+		// axis
+		maxAxisYValueSizeInPx,
+		
+		// grid
+		gridPositionProjectionX[16],
+		gridPositionProjectionY[16],
+		
+		// frame size
+		width,
+		height,
+		
+		// margin
+		margin_px,
+		
+		// mouse
+		mouseX,
+		mouseY;
+		
+extern
+	float
+		// axis
+		axisXValues[MAX_GRID_LINE],
+		axisYValues[MAX_GRID_LINE],
+		
+		// grid
+		gridPositionModelX[MAX_GRID_LINE],
+		gridPositionModelY[MAX_GRID_LINE],
+ 
+		// margin
+		margin,
+		margin_x,
+		margin_y;
 
-extern float axisXValues[16];
-extern float axisYValues[16];
-extern float gridPositionModelX[16];
-extern float gridPositionModelY[16];
-extern int gridPositionProjectionX[16];
-extern int gridPositionProjectionY[16];
-extern int maxAxisYValueSizeInPx;
-extern int width, height;
-extern float margin;
-extern int margin_px, marginX_px, marginY_px;
-extern int mouseX, mouseY;
+extern bounds b;
+extern bounds viewBounds; 
 extern GLFWwindow* window;
 
 /*! 
  * methods
  */
+ 
+// own
  
 void plotc(float*, float*, int, const char*);
 
